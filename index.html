@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeMaster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#0d0d0d;color:#e8e8e8}
+::-webkit-scrollbar{display:none}
+body{scrollbar-width:none}
+@keyframes blink{50%{opacity:0}}
+.blink{animation:blink 1s step-end infinite}
+button{cursor:pointer}
+</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+  <script>
+window.addEventListener('load', function() {
+var h=React.createElement;
+var useState=React.useState,useEffect=React.useEffect,useRef=React.useRef,useCallback=React.useCallback;
+var LineChart=Recharts.LineChart,Line=Recharts.Line,XAxis=Recharts.XAxis,YAxis=Recharts.YAxis;
+var ResponsiveContainer=Recharts.ResponsiveContainer,Tooltip=Recharts.Tooltip;
+
+var CA='#e2b714',CB='#0d0d0d',CW='#e8e8e8',CU='#3a3a3a',CE='#ca4754',CM='#555';
+var FM="'Courier Prime','Courier New',monospace";
+var FS="'Helvetica Neue',Helvetica,Arial,sans-serif";
+
+var WORD_POOL='the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us great between need large often hand high place hold turn here why help where much through before line right too mean old same tell follow came show form small set put end does another such real thing world keep still own while last school think never open seem together next white children begin got walk example ease paper group always music those both mark book letter until mile river car feet care second enough plain girl usual young ready above ever red list though feel talk bird soon body dog family direct pose leave song measure door product black short numeral off always move try kind hand picture again change play spell air away animal house point letter mother answer found study still learn plant cover food sun four between state keep eye never last let thought city tree cross farm hard start might story saw far sea draw left late run while press close night real life few north open seem together next white'.split(' ').filter(Boolean);
+
+var QUOTES=[
+  {text:'the only way to do great work is to love what you do',author:'Steve Jobs'},
+  {text:'in the middle of every difficulty lies opportunity',author:'Albert Einstein'},
+  {text:'it does not matter how slowly you go as long as you do not stop',author:'Confucius'},
+  {text:'life is what happens when you are busy making other plans',author:'John Lennon'},
+  {text:'the future belongs to those who believe in the beauty of their dreams',author:'Eleanor Roosevelt'},
+  {text:'the way to get started is to quit talking and begin doing',author:'Walt Disney'},
+  {text:'whether you think you can or you think you cannot you are right',author:'Henry Ford'},
+  {text:'never let the fear of striking out keep you from playing the game',author:'Babe Ruth'},
+  {text:'you must be the change you wish to see in the world',author:'Mahatma Gandhi'},
+  {text:'believe you can and you are halfway there',author:'Theodore Roosevelt'},
+  {text:'success is not final failure is not fatal it is the courage to continue that counts',author:'Winston Churchill'},
+  {text:'it always seems impossible until it is done',author:'Nelson Mandela'},
+  {text:'the secret of getting ahead is getting started',author:'Mark Twain'}
+];
+
+var KB_ROWS=[
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['Z','X','C','V','B','N','M']
+];
+
+function shuffle(a){return[...a].sort(function(){return Math.random()-0.5;});}
+function genWords(n){var r=[];while(r.length<n)r.push.apply(r,shuffle(WORD_POOL));return r.slice(0,n);}
+function heatColor(e,m){
+  if(!e||!m)return'#111';
+  var t=Math.min(e/m,1);
+  return'rgb('+Math.round(17+t*209)+','+Math.round(17+t*166)+','+Math.round(17+t*3)+')';
+}
+
+function TypeMaster(){
+  var s1=useState('time'),mode=s1[0],setMode=s1[1];
+  var s2=useState(60),timeOpt=s2[0],setTimeOpt=s2[1];
+  var s3=useState(25),wordsOpt=s3[0],setWordsOpt=s3[1];
+  var s4=useState([]),words=s4[0],setWords=s4[1];
+  var s5=useState(null),activeQuote=s5[0],setActiveQuote=s5[1];
+  var s6=useState('idle'),phase=s6[0],setPhase=s6[1];
+  var s7=useState([]),completedWords=s7[0],setCompletedWords=s7[1];
+  var s8=useState(0),wordIdx=s8[0],setWordIdx=s8[1];
+  var s9=useState(''),curInput=s9[0],setCurInput=s9[1];
+  var s10=useState(60),timeLeft=s10[0],setTimeLeft=s10[1];
+  var s11=useState(0),liveWpm=s11[0],setLiveWpm=s11[1];
+  var s12=useState({}),keyErrors=s12[0],setKeyErrors=s12[1];
+  var s13=useState([]),wpmHist=s13[0],setWpmHist=s13[1];
+  var s14=useState(null),results=s14[0],setResults=s14[1];
+  var s15=useState(0),translateY=s15[0],setTranslateY=s15[1];
+
+  var inputRef=useRef(null);
+  var timerRef=useRef(null);
+  var wordRefsMap=useRef({});
+  var lineYRef=useRef(0);
+  var modeRef=useRef(mode);
+  var timeOptRef=useRef(timeOpt);
+  var wordsRf=useRef([]);
+  var completedRf=useRef([]);
+  var wordIdxRf=useRef(0);
+  var keyErrRf=useRef({});
+  var wpmHistRf=useRef([]);
+  var correctRf=useRef(0);
+  var startRf=useRef(0);
+  var phaseRef=useRef('idle');
+  var curInputRef=useRef('');
+
+  useEffect(function(){modeRef.current=mode;},[mode]);
+  useEffect(function(){timeOptRef.current=timeOpt;},[timeOpt]);
+
+  useEffect(function(){
+    var el=wordRefsMap.current[wordIdx];
+    if(!el)return;
+    var top=el.offsetTop;
+    if(top!==lineYRef.current){lineYRef.current=top;setTranslateY(-top);}
+  },[wordIdx]);
+
+  var doFinish=useCallback(function(){
+    clearInterval(timerRef.current);
+    var elapsed=(Date.now()-startRf.current)/1000;
+    var mins=Math.max(elapsed/60,0.001);
+    var wpm=Math.round(correctRf.current/mins)||0;
+    var used=wordsRf.current.slice(0,completedRf.current.length);
+    var avgLen=used.length>0?used.reduce(function(s,w){return s+w.length;},0)/used.length:5;
+    var totalChars=completedRf.current.reduce(function(s,c){return s+c.input.length+1;},0);
+    var rawWpm=Math.round(totalChars/avgLen/mins)||0;
+    setResults({wpm:wpm,rawWpm:rawWpm,wpmHist:wpmHistRf.current.slice(),keyErrors:Object.assign({},keyErrRf.current)});
+    setPhase('results');phaseRef.current='results';
+  },[]);
+
+  var init=useCallback(function(){
+    clearInterval(timerRef.current);
+    wordRefsMap.current={};lineYRef.current=0;
+    var w,quote=null;
+    if(mode==='quotes'){quote=QUOTES[Math.floor(Math.random()*QUOTES.length)];w=quote.text.split(' ');}
+    else if(mode==='words'){w=genWords(wordsOpt);}
+    else{w=genWords(350);}
+    wordsRf.current=w;completedRf.current=[];wordIdxRf.current=0;
+    keyErrRf.current={};wpmHistRf.current=[];correctRf.current=0;
+    startRf.current=0;curInputRef.current='';phaseRef.current='idle';
+    setWords(w);setActiveQuote(quote);setPhase('idle');setCompletedWords([]);
+    setWordIdx(0);setCurInput('');setTimeLeft(timeOpt);setLiveWpm(0);
+    setKeyErrors({});setWpmHist([]);setResults(null);setTranslateY(0);
+    setTimeout(function(){if(inputRef.current)inputRef.current.focus();},60);
+  },[mode,timeOpt,wordsOpt]);
+
+  useEffect(function(){init();},[init]);
+
+  var startTyping=useCallback(function(){
+    phaseRef.current='typing';setPhase('typing');startRf.current=Date.now();
+    timerRef.current=setInterval(function(){
+      var elapsed=(Date.now()-startRf.current)/1000;
+      var wpm=Math.round(correctRf.current/(elapsed/60))||0;
+      wpmHistRf.current=wpmHistRf.current.concat([{t:Math.round(elapsed),wpm:wpm}]);
+      setWpmHist(wpmHistRf.current.slice());
+      setLiveWpm(wpm);
+      if(modeRef.current==='time'){
+        var remaining=Math.max(0,timeOptRef.current-Math.floor(elapsed));
+        setTimeLeft(remaining);
+        if(remaining<=0)doFinish();
+      }
+    },1000);
+  },[doFinish]);
+
+  var handleKeyDown=useCallback(function(e){
+    if(e.key==='Tab'||e.key==='Escape'){e.preventDefault();init();return;}
+    if(e.key==='Backspace'&&curInputRef.current===''&&wordIdxRf.current>0){
+      e.preventDefault();
+      var prevIdx=wordIdxRf.current-1;
+      var prevEntry=completedRf.current[prevIdx];
+      if(!prevEntry)return;
+      completedRf.current=completedRf.current.slice(0,prevIdx);
+      if(prevEntry.ok)correctRf.current=Math.max(0,correctRf.current-1);
+      wordIdxRf.current=prevIdx;curInputRef.current=prevEntry.input;
+      setWordIdx(prevIdx);setCompletedWords(completedRf.current.slice());setCurInput(prevEntry.input);
+    }
+  },[init]);
+
+  var handleChange=useCallback(function(e){
+    if(phaseRef.current==='results')return;
+    var val=e.target.value;
+    var prevVal=curInputRef.current;
+    curInputRef.current=val;
+    if(phaseRef.current!=='typing'&&val.trim())startTyping();
+    if(val.slice(-1)===' '){
+      var input=val.trim();
+      if(!input){setCurInput('');curInputRef.current='';return;}
+      var target=wordsRf.current[wordIdxRf.current]||'';
+      var ok=input===target;
+      if(ok)correctRf.current++;
+      completedRf.current=completedRf.current.concat([{word:target,input:input,ok:ok}]);
+      setCompletedWords(completedRf.current.slice());
+      var nextIdx=wordIdxRf.current+1;
+      wordIdxRf.current=nextIdx;curInputRef.current='';
+      setWordIdx(nextIdx);setCurInput('');
+      if((mode==='words'||mode==='quotes')&&nextIdx>=wordsRf.current.length)doFinish();
+      return;
+    }
+    if(val.length>prevVal.length){
+      var pos=val.length-1;
+      var typed=val[pos]?val[pos].toUpperCase():'';
+      var expCh=(wordsRf.current[wordIdxRf.current]||'')[pos];
+      var expUp=expCh?expCh.toUpperCase():'';
+      if(typed&&expUp&&typed!==expUp){
+        var newErrs=Object.assign({},keyErrRf.current);
+        newErrs[typed]=(newErrs[typed]||0)+1;
+        keyErrRf.current=newErrs;
+        setKeyErrors(Object.assign({},newErrs));
+      }
+    }
+    setCurInput(val);
+  },[mode,startTyping,doFinish]);
+
+  function renderWord(word,idx){
+    var isCurrent=idx===wordIdx;
+    var c=completedWords[idx];
+    var chars=[];
+    var i,j;
+    if(idx<wordIdx&&c){
+      for(i=0;i<word.length;i++){
+        var tc=c.input[i];
+        chars.push(h('span',{key:i,style:{color:(tc!==undefined&&tc===word[i])?CW:CE}},word[i]));
+      }
+      for(j=word.length;j<c.input.length;j++){
+        chars.push(h('span',{key:'x'+j,style:{color:CE}},c.input[j]));
+      }
+    } else if(isCurrent){
+      for(i=0;i<word.length;i++){
+        var tc2=curInput[i];
+        var isCur=(i===curInput.length);
+        var col=CU;
+        if(tc2!==undefined)col=(tc2===word[i])?CW:CE;
+        chars.push(h('span',{key:i,style:{color:col,borderLeft:isCur?'2px solid '+CA:undefined}},word[i]));
+      }
+      for(j=word.length;j<curInput.length;j++){
+        chars.push(h('span',{key:'x'+j,style:{color:CE}},curInput[j]));
+      }
+      if(curInput.length>=word.length){
+        chars.push(h('span',{key:'ec',className:'blink',style:{borderLeft:'2px solid '+CA}}));
+      }
+    } else {
+      for(i=0;i<word.length;i++){
+        chars.push(h('span',{key:i,style:{color:CU}},word[i]));
+      }
+    }
+    var cursorEl=(isCurrent&&curInput.length===0)
+      ?h('span',{className:'blink',style:{position:'absolute',left:-1,top:'5%',height:'90%',borderLeft:'2px solid '+CA}})
+      :null;
+    var children=[cursorEl].concat(chars);
+    return h('span',{
+      key:idx,
+      ref:function(el){if(el)wordRefsMap.current[idx]=el;},
+      style:{display:'inline-block',marginRight:'0.6em',fontFamily:FM,fontSize:'1.38rem',letterSpacing:'0.02em',position:'relative',lineHeight:1}
+    },children);
+  }
+
+  // RESULTS SCREEN
+  if(phase==='results'&&results){
+    var maxErr=Math.max.apply(null,Object.values(results.keyErrors).concat([1]));
+    return h('div',{style:{minHeight:'100vh',background:CB,color:CW,fontFamily:FS}},
+      h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 40px',borderBottom:'1px solid #181818'}},
+        h('span',{style:{fontSize:15,color:'#777',fontWeight:300,fontFamily:FS}},
+          'Type',h('strong',{style:{fontWeight:700,color:'#bbb'}},'Master')
+        ),
+        h('div',{style:{display:'flex',gap:28,fontSize:13,color:'#2e2e2e',fontFamily:FS}},
+          ['Leaderboard','About','Settings'].map(function(l){return h('span',{key:l,style:{cursor:'pointer'}},l);})
+        )
+      ),
+      h('div',{style:{maxWidth:820,margin:'0 auto',padding:'50px 30px 80px'}},
+        h('div',{style:{display:'flex',gap:80,marginBottom:64,alignItems:'flex-end'}},
+          h('div',null,
+            h('div',{style:{fontFamily:FS,fontSize:11,color:CM,letterSpacing:3,textTransform:'uppercase',marginBottom:8}},'wpm'),
+            h('div',{style:{fontFamily:FS,fontSize:84,fontWeight:200,color:CA,lineHeight:1,letterSpacing:-2}},results.wpm)
+          ),
+          h('div',null,
+            h('div',{style:{fontFamily:FS,fontSize:11,color:CM,letterSpacing:3,textTransform:'uppercase',marginBottom:8}},'raw'),
+            h('div',{style:{fontFamily:FS,fontSize:84,fontWeight:200,color:'#888',lineHeight:1,letterSpacing:-2}},results.rawWpm)
+          ),
+          h('div',{style:{marginLeft:'auto',alignSelf:'center'}},
+            h('button',{onClick:init,
+              onMouseEnter:function(e){e.currentTarget.style.borderColor=CA;e.currentTarget.style.color=CA;},
+              onMouseLeave:function(e){e.currentTarget.style.borderColor='#252525';e.currentTarget.style.color=CM;},
+              style:{background:'none',border:'1px solid #252525',color:CM,padding:'11px 40px',fontFamily:FS,fontSize:12,letterSpacing:3,textTransform:'uppercase',borderRadius:4,transition:'all 0.2s'}
+            },'↻ restart')
+          )
+        ),
+        results.wpmHist.length>1&&h('div',{style:{marginBottom:64}},
+          h('div',{style:{fontFamily:FS,fontSize:11,color:CM,letterSpacing:3,textTransform:'uppercase',marginBottom:20}},'wpm over time'),
+          h(ResponsiveContainer,{width:'100%',height:190},
+            h(LineChart,{data:results.wpmHist,margin:{top:5,right:10,left:-24,bottom:5}},
+              h(XAxis,{dataKey:'t',stroke:'#1e1e1e',tick:{fill:'#3a3a3a',fontSize:10,fontFamily:FS},label:{value:'s',position:'insideBottomRight',offset:-2,fill:'#3a3a3a',fontSize:10}}),
+              h(YAxis,{stroke:'#1e1e1e',tick:{fill:'#3a3a3a',fontSize:10,fontFamily:FS},domain:['auto','auto']}),
+              h(Tooltip,{
+                contentStyle:{background:'#181818',border:'1px solid #2a2a2a',borderRadius:4,fontFamily:FS,fontSize:12,color:CW},
+                formatter:function(v){return[v+' wpm',''];},
+                labelFormatter:function(l){return l+'s';},
+                cursor:{stroke:'#2a2a2a'}
+              }),
+              h(Line,{type:'monotone',dataKey:'wpm',stroke:CA,strokeWidth:2,dot:false,activeDot:{r:3,fill:CA}})
+            )
+          )
+        ),
+        h('div',null,
+          h('div',{style:{fontFamily:FS,fontSize:11,color:CM,letterSpacing:3,textTransform:'uppercase',marginBottom:20}},'error heatmap'),
+          h('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',gap:5}},
+            KB_ROWS.map(function(row,ri){
+              return h('div',{key:ri,style:{display:'flex',gap:5,marginLeft:ri===1?24:ri===2?48:0}},
+                row.map(function(key){
+                  var err=results.keyErrors[key]||0;
+                  var bg=heatColor(err,maxErr);
+                  var tc2=(err/maxErr)>0.55?'#0a0a0a':'#3a3a3a';
+                  return h('div',{key:key,title:key+': '+err+' error'+(err!==1?'s':''),
+                    onMouseEnter:function(e){e.currentTarget.style.transform='scale(1.1)';},
+                    onMouseLeave:function(e){e.currentTarget.style.transform='scale(1)';},
+                    style:{width:48,height:48,background:bg,border:'1px solid '+(err>0?'transparent':'#1c1c1c'),borderRadius:7,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',transition:'transform 0.1s'}
+                  },
+                    h('div',{style:{fontFamily:FS,fontSize:13,fontWeight:500,color:tc2}},key),
+                    err>0?h('div',{style:{fontFamily:FS,fontSize:8,color:tc2,opacity:0.75,marginTop:1}},String(err)):null
+                  );
+                })
+              );
+            }),
+            h('div',{style:{width:300,height:40,marginTop:3,background:heatColor(results.keyErrors['SPACE']||0,maxErr),border:'1px solid #1c1c1c',borderRadius:7,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:FS,fontSize:10,color:'#3a3a3a',letterSpacing:3}},'SPACE'),
+            Object.keys(results.keyErrors).length===0
+              ?h('div',{style:{fontFamily:FS,fontSize:11,color:'#2a2a2a',letterSpacing:2,marginTop:16,textTransform:'uppercase'}},'no errors recorded')
+              :null
+          )
+        )
+      )
+    );
+  }
+
+  // TYPING SCREEN
+  return h('div',{style:{minHeight:'100vh',background:CB,color:CW,fontFamily:FS},
+    onClick:function(){if(inputRef.current)inputRef.current.focus();}
+  },
+    h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 40px',borderBottom:'1px solid #181818'}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+        h('span',{style:{fontSize:18,opacity:0.4}},'⌨'),
+        h('span',{style:{fontSize:15,color:'#777',fontWeight:300,fontFamily:FS}},
+          'Type',h('strong',{style:{fontWeight:700,color:'#bbb'}},'Master')
+        )
+      ),
+      h('div',{style:{display:'flex',gap:28,fontSize:13,color:'#2e2e2e',fontFamily:FS}},
+        ['Leaderboard','About','Settings'].map(function(l){
+          return h('span',{key:l,style:{cursor:'pointer'},
+            onMouseEnter:function(e){e.currentTarget.style.color=CM;},
+            onMouseLeave:function(e){e.currentTarget.style.color='#2e2e2e';}
+          },l);
+        })
+      ),
+      h('div',{style:{fontSize:13,color:'#2e2e2e',fontFamily:FS}},'👤')
+    ),
+    h('div',{style:{maxWidth:820,margin:'0 auto',padding:'38px 30px 0',display:'flex',justifyContent:'space-between',alignItems:'baseline'}},
+      h('span',{style:{fontFamily:FS,fontSize:48,fontWeight:200,color:CA,lineHeight:1,letterSpacing:-1}},
+        mode==='time'?String(timeLeft):wordIdx+' / '+words.length
+      ),
+      h('span',{style:{fontFamily:FS,fontSize:20,fontWeight:300,color:'#3a3a3a'}},
+        phase==='typing'?liveWpm+' wpm':''
+      )
+    ),
+    h('div',{style:{maxWidth:820,margin:'26px auto 0',padding:'0 30px',display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}},
+      h('div',{style:{display:'flex',background:'#141414',borderRadius:8,padding:3,gap:2}},
+        [{k:'time',l:'time'},{k:'words',l:'words'},{k:'quotes',l:'quotes'}].map(function(item){
+          return h('button',{key:item.k,onClick:function(e){e.stopPropagation();setMode(item.k);},
+            style:{background:mode===item.k?'#252525':'none',color:mode===item.k?CA:CM,border:'none',padding:'7px 18px',borderRadius:6,fontFamily:FS,fontSize:13,fontWeight:mode===item.k?500:400,transition:'all 0.15s'}
+          },item.l);
+        })
+      ),
+      h('div',{style:{width:1,height:18,background:'#202020',margin:'0 4px'}}),
+      mode==='time'?[15,30,60].map(function(t){
+        return h('button',{key:t,onClick:function(e){e.stopPropagation();setTimeOpt(t);},
+          style:{background:'none',color:timeOpt===t?CA:CM,border:'none',padding:'7px 12px',fontFamily:FS,fontSize:13,fontWeight:timeOpt===t?600:400,transition:'color 0.15s'}
+        },String(t));
+      }):null,
+      mode==='words'?[10,25,50,100].map(function(n){
+        return h('button',{key:n,onClick:function(e){e.stopPropagation();setWordsOpt(n);},
+          style:{background:'none',color:wordsOpt===n?CA:CM,border:'none',padding:'7px 12px',fontFamily:FS,fontSize:13,fontWeight:wordsOpt===n?600:400,transition:'color 0.15s'}
+        },String(n));
+      }):null,
+      (mode==='quotes'&&activeQuote)?h('span',{style:{fontFamily:FS,fontSize:12,color:'#333',fontStyle:'italic',marginLeft:4}},'— '+activeQuote.author):null,
+      h('button',{onClick:function(e){e.stopPropagation();init();},
+        onMouseEnter:function(e){e.currentTarget.style.color=CM;},
+        onMouseLeave:function(e){e.currentTarget.style.color='#2a2a2a';},
+        style:{marginLeft:'auto',background:'none',border:'none',color:'#2a2a2a',fontFamily:FS,fontSize:20,padding:'0 4px',transition:'color 0.15s'}
+      },'↻')
+    ),
+    h('div',{style:{maxWidth:820,margin:'32px auto 0',padding:'0 30px',position:'relative'}},
+      h('div',{style:{position:'absolute',top:0,left:30,right:30,height:32,background:'linear-gradient(to bottom,#0d0d0d 30%,transparent)',zIndex:10,pointerEvents:'none'}}),
+      h('div',{style:{height:165,overflow:'hidden',position:'relative'}},
+        h('div',{style:{lineHeight:'3.3rem',transform:'translateY('+translateY+'px)',transition:'transform 0.18s cubic-bezier(0.4,0,0.2,1)',userSelect:'none'}},
+          words.map(function(word,idx){return renderWord(word,idx);})
+        )
+      ),
+      h('div',{style:{position:'absolute',bottom:0,left:30,right:30,height:36,background:'linear-gradient(to top,#0d0d0d 30%,transparent)',zIndex:10,pointerEvents:'none'}}),
+      h('input',{ref:inputRef,value:curInput,onChange:handleChange,onKeyDown:handleKeyDown,
+        style:{position:'absolute',opacity:0,width:1,height:1,top:0,left:0,pointerEvents:'none'},
+        autoComplete:'off',autoCorrect:'off',autoCapitalize:'none',spellCheck:false
+      })
+    ),
+    h('div',{style:{textAlign:'center',marginTop:28,fontFamily:FS,fontSize:11,
+      color:phase==='idle'?'#282828':'transparent',letterSpacing:2,textTransform:'uppercase',
+      transition:'color 0.4s',userSelect:'none'}},
+      'start typing · tab or esc to restart · backspace to fix previous word'
+    )
+  );
+}
+
+var rootEl=document.getElementById('root');
+var root=ReactDOM.createRoot(rootEl);
+root.render(React.createElement(TypeMaster));
+}); // end window load
+</script>
+</body>
+</html>
