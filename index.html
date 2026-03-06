@@ -272,7 +272,7 @@ function TypeMaster(){
     var maxErr = Math.max.apply(null, Object.values(results.keyErrors).concat([1]));
     return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS}},
       NavEl(init),
-      h('div',{style:{maxWidth:860,margin:'0 auto',padding:'56px 36px 80px'}},
+      h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'56px 36px 80px'}},
         /* stats row */
         h('div',{style:{display:'flex',gap:64,marginBottom:72,alignItems:'flex-end'}},
           StatEl('wpm', results.wpm, CW, 96),
@@ -347,7 +347,7 @@ function TypeMaster(){
     NavEl(init),
 
     /* counter + live wpm */
-    h('div',{style:{maxWidth:860,margin:'0 auto',padding:'36px 36px 0',
+    h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'36px 36px 0',
       display:'flex',justifyContent:'space-between',alignItems:'baseline'}},
       h('span',{style:{fontFamily:FS,fontSize:52,fontWeight:800,color:CW,lineHeight:1,letterSpacing:-2}},
         mode==='time'?String(timeLeft):wordIdx+' / '+words.length
@@ -358,7 +358,7 @@ function TypeMaster(){
     ),
 
     /* mode selector */
-    h('div',{style:{maxWidth:860,margin:'22px auto 0',padding:'0 36px',
+    h('div',{style:{maxWidth:1100,margin:'22px auto 0',padding:'0 36px',
       display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}},
       h('div',{style:{display:'flex',background:'#111',borderRadius:6,padding:3,gap:2}},
         [{k:'time',l:'TIME'},{k:'words',l:'WORDS'},{k:'quotes',l:'QUOTES'}].map(function(item){
@@ -395,7 +395,7 @@ function TypeMaster(){
     ),
 
     /* ── word display ── */
-    h('div',{style:{maxWidth:860,margin:'30px auto 0',padding:'0 36px',position:'relative'}},
+    h('div',{style:{maxWidth:1100,margin:'30px auto 0',padding:'0 36px',position:'relative'}},
       /* top fade */
       h('div',{style:{position:'absolute',top:0,left:36,right:36,height:28,
         background:'linear-gradient(to bottom,'+BG+' 20%,transparent)',zIndex:10,pointerEvents:'none'}}),
