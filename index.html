@@ -12,9 +12,10 @@ html,body{min-height:100%;background:#0a0a0a;color:#e8e8e8}
 ::-webkit-scrollbar{display:none}
 body{scrollbar-width:none}
 @keyframes blink{50%{opacity:0}}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
 .blink{animation:blink 1s step-end infinite}
 button{cursor:pointer}
-</style>
+  </style>
 </head>
 <body>
   <div id="root"></div>
@@ -25,578 +26,619 @@ button{cursor:pointer}
   <script>
 window.addEventListener('load', function() {
 
-var h = React.createElement;
-var useState = React.useState;
-var useEffect = React.useEffect;
-var useRef = React.useRef;
-var useCallback = React.useCallback;
-var LineChart = Recharts.LineChart;
-var Line = Recharts.Line;
-var XAxis = Recharts.XAxis;
-var YAxis = Recharts.YAxis;
-var ResponsiveContainer = Recharts.ResponsiveContainer;
-var Tooltip = Recharts.Tooltip;
+var h=React.createElement;
+var useState=React.useState,useEffect=React.useEffect,useRef=React.useRef,useCallback=React.useCallback;
+var LineChart=Recharts.LineChart,Line=Recharts.Line,XAxis=Recharts.XAxis,YAxis=Recharts.YAxis;
+var ResponsiveContainer=Recharts.ResponsiveContainer,Tooltip=Recharts.Tooltip;
 
-var BG   = '#0a0a0a';
-var CW   = '#f0f0f0';  /* correct / bright white */
-var CDM  = '#282828';  /* untyped dark */
-var CE   = '#c0392b';  /* error red */
-var CM   = '#444';     /* muted */
-var CG   = '#222';     /* dim grey */
-var FM   = "'Courier Prime','Courier New',monospace";
-var FS   = "'Helvetica Neue',Helvetica,Arial,sans-serif";
-var WORD_SIZE = '1.55rem';
-var LINE_H    = '3.6rem';
-var VISIBLE_H = 195; /* px — fits exactly 3 lines */
+var BG='#0a0a0a',CW='#f0f0f0',CE='#c0392b',CM='#444';
+var FM="'Courier Prime','Courier New',monospace";
+var FS="'Helvetica Neue',Helvetica,Arial,sans-serif";
+var WORD_SIZE='1.55rem',LINE_H='3.6rem',VISIBLE_H=195;
 
-var WORD_POOL = 'the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us great between need large often hand high place hold turn here why help where much through before line right too mean old same tell follow came show form small set put end does another such real thing world keep still own while last school think never open seem together next white children begin got walk example ease paper group always music those both mark book letter until mile river car feet care second enough plain girl usual young ready above ever red list though feel talk bird soon body dog family direct pose leave song measure door product black short numeral off always move try kind hand picture again change play spell air away animal house point letter mother answer found study still learn plant cover food sun four between state keep eye never last let thought city tree cross farm hard start might story saw far sea draw left late run while press close night real life few north open seem together next white'.split(' ').filter(Boolean);
+var WORD_POOL='the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us great between need large often hand high place hold turn here why help where much through before line right too mean old same tell follow came show form small set put end does another such real thing world keep still own while last school think never open seem together next white children begin got walk example ease paper group always music those both mark book letter until mile river car feet care second enough plain girl usual young ready above ever red list though feel talk bird soon body dog family direct pose leave song measure door product black short numeral off always move try kind hand picture again change play spell air away animal house point letter mother answer found study still learn plant cover food sun four between state keep eye never last let thought city tree cross farm hard start might story saw far sea draw left late run while press close night real life few north open seem together next white'.split(' ').filter(Boolean);
 
-var QUOTES = [
-  {text:'The future rewards those who keep moving forward. Change will not come if we wait for someone else or some other time.',author:'Barack Obama'},
-  {text:'Yes we can build a better future, but it requires responsibility. Progress begins when ordinary people decide to participate.',author:'Barack Obama'},
-  {text:'Hope is not blind optimism. Hope is the belief that something better is possible if we work for it.',author:'Barack Obama'},
-  {text:'If you\'re walking down the right path and you\'re willing to keep walking, eventually you\'ll make progress.',author:'Barack Obama'},
-  {text:'We are the change that we seek. Waiting for heroes only delays the work that belongs to us.',author:'Barack Obama'},
-  {text:'A democracy thrives when citizens stay engaged. Silence is often the greatest threat to freedom.',author:'Barack Obama'},
-  {text:'Real leadership is not about power. It is about responsibility to the people you serve.',author:'Barack Obama'},
-  {text:'Imagination is more important than knowledge. Knowledge is limited but imagination encircles the world.',author:'Albert Einstein'},
-  {text:'Life is like riding a bicycle. To keep your balance, you must keep moving.',author:'Albert Einstein'},
-  {text:'A person who never made a mistake never tried anything new. Failure is simply the evidence of experimentation.',author:'Albert Einstein'},
-  {text:'The important thing is not to stop questioning. Curiosity has its own reason for existing.',author:'Albert Einstein'},
-  {text:'Logic will get you from A to B. Imagination will take you everywhere.',author:'Albert Einstein'},
-  {text:'Great spirits have always encountered violent opposition from mediocre minds. Innovation disturbs comfort.',author:'Albert Einstein'},
-  {text:'He who has a why to live can bear almost any how. Purpose gives strength to endure suffering.',author:'Friedrich Nietzsche'},
-  {text:'That which does not kill us makes us stronger. Adversity sharpens the spirit.',author:'Friedrich Nietzsche'},
-  {text:'There are no facts, only interpretations. Perspective shapes the world we experience.',author:'Friedrich Nietzsche'},
-  {text:'The snake which cannot shed its skin must perish. Minds that refuse change suffer the same fate.',author:'Friedrich Nietzsche'},
-  {text:'The individual has always had to struggle to keep from being overwhelmed by the tribe. Courage begins with independence.',author:'Friedrich Nietzsche'},
-  {text:'The higher we soar, the smaller we appear to those who cannot fly. Greatness is often misunderstood.',author:'Friedrich Nietzsche'},
-  {text:'A book must be the axe for the frozen sea within us. Literature should awaken what lies dormant.',author:'Franz Kafka'},
-  {text:'You are free, and that is why you are lost. Freedom without direction creates confusion.',author:'Franz Kafka'},
-  {text:'Start with what is right rather than what is acceptable. Integrity is rarely convenient.',author:'Franz Kafka'},
-  {text:'In the fight between you and the world, back the world. Reality does not negotiate with emotion.',author:'Franz Kafka'},
-  {text:'Anyone who keeps the ability to see beauty never grows old. Wonder protects the spirit.',author:'Franz Kafka'},
-  {text:'The world itself is just one big hoax. We\'re just puppets for the corporations.',author:'Mr. Robot'},
-  {text:'Power belongs to the people that take it. Systems only survive because we believe in them.',author:'Mr. Robot'},
-  {text:'Sometimes the truth is the most dangerous virus. Once people see it, they cannot unsee it.',author:'Mr. Robot'},
-  {text:'The system isn\'t broken. It was built this way.',author:'Mr. Robot'},
-  {text:'Reality can be rewritten by those who control the narrative. Information is the ultimate weapon.',author:'Mr. Robot'},
-  {text:'If you have a sense of humor about life, you can survive almost anything. Laughter is a form of armor.',author:'Jimmy Carr'},
-  {text:'Comedy is simply honesty with timing. Truth becomes funny when you remove the filters.',author:'Jimmy Carr'},
-  {text:'The trick to life is perspective. Change the angle and the problem changes shape.',author:'Jimmy Carr'},
-  {text:'A joke is a tiny rebellion against seriousness. Humor disrupts the ordinary.',author:'Jimmy Carr'},
-  {text:'The best comedians observe what everyone else ignores. Insight hides in everyday moments.',author:'Jimmy Carr'},
-  {text:'You\'re only given a little spark of madness. You mustn\'t lose it.',author:'Robin Williams'},
-  {text:'No matter what people tell you, words and ideas can change the world.',author:'Robin Williams'},
-  {text:'Everyone you meet is fighting a battle you know nothing about. Be kind.',author:'Robin Williams'},
-  {text:'The human spirit is stronger than anything that can happen to it. Resilience defines us.',author:'Robin Williams'},
-  {text:'Laughter connects people instantly. Humor dissolves barriers.',author:'Robin Williams'},
-  {text:'Your value in the marketplace determines your income. Increase your value and your income follows.',author:'Patrick Bet-David'},
-  {text:'Execution beats intelligence when intelligence refuses to act. Action compounds results.',author:'Patrick Bet-David'},
-  {text:'If you want a bigger future, build bigger skills. Growth is always a skill problem.',author:'Patrick Bet-David'},
-  {text:'The best entrepreneurs are obsessed with solving problems. Profit follows usefulness.',author:'Patrick Bet-David'},
-  {text:'Great companies are built by people who refuse average standards. Excellence becomes culture.',author:'Patrick Bet-David'},
-  {text:'Discipline is remembering what you want most. Short-term impulses lose to long-term clarity.',author:'Chris Williamson'},
-  {text:'Modern comfort creates weak minds. Voluntary hardship rebuilds strength.',author:'Chris Williamson'},
-  {text:'Self-awareness is a superpower. Most people move through life unconsciously.',author:'Chris Williamson'},
-  {text:'Confidence grows when promises to yourself are kept. Integrity begins internally.',author:'Chris Williamson'},
-  {text:'A meaningful life is built deliberately. Accidental success is rare.',author:'Chris Williamson'},
-  {text:'Success often begins where comfort ends. Growth demands inconvenience.',author:'Unknown'},
-  {text:'The most powerful habit is consistency. Small actions repeated daily create massive change.',author:'Unknown'},
-  {text:'Patience is a competitive advantage in a distracted world. Focus outlasts hype.',author:'Unknown'},
-  {text:'Discipline turns dreams into plans. Plans turn into results.',author:'Unknown'},
-  {text:'Curiosity expands intelligence. Questions open doors that answers close.',author:'Unknown'},
-  {text:'Consistency is louder than promises. Actions prove commitment.',author:'Unknown'},
-  {text:'Momentum builds slowly then suddenly. Persistence triggers breakthroughs.',author:'Unknown'},
-  {text:'Strong character grows from repeated discipline. Integrity compounds quietly.',author:'Unknown'},
-  {text:'Energy flows where attention goes. Direct it wisely.',author:'Unknown'},
-  {text:'Small improvements accumulate dramatically. Marginal gains create massive results.',author:'Unknown'},
-  {text:'The future belongs to adaptive minds. Flexibility defeats rigidity.',author:'Unknown'},
-  {text:'Knowledge becomes wisdom through application. Use what you learn.',author:'Unknown'}
+var QUOTES=[
+  {text:"The future rewards those who keep moving forward. Change will not come if we wait for someone else or some other time.",author:"Barack Obama"},
+  {text:"Yes we can build a better future, but it requires responsibility. Progress begins when ordinary people decide to participate.",author:"Barack Obama"},
+  {text:"Hope is not blind optimism. Hope is the belief that something better is possible if we work for it.",author:"Barack Obama"},
+  {text:"If you're walking down the right path and you're willing to keep walking, eventually you'll make progress.",author:"Barack Obama"},
+  {text:"We are the change that we seek. Waiting for heroes only delays the work that belongs to us.",author:"Barack Obama"},
+  {text:"A democracy thrives when citizens stay engaged. Silence is often the greatest threat to freedom.",author:"Barack Obama"},
+  {text:"Real leadership is not about power. It is about responsibility to the people you serve.",author:"Barack Obama"},
+  {text:"Imagination is more important than knowledge. Knowledge is limited but imagination encircles the world.",author:"Albert Einstein"},
+  {text:"Life is like riding a bicycle. To keep your balance, you must keep moving.",author:"Albert Einstein"},
+  {text:"A person who never made a mistake never tried anything new. Failure is simply the evidence of experimentation.",author:"Albert Einstein"},
+  {text:"The important thing is not to stop questioning. Curiosity has its own reason for existing.",author:"Albert Einstein"},
+  {text:"Logic will get you from A to B. Imagination will take you everywhere.",author:"Albert Einstein"},
+  {text:"Great spirits have always encountered violent opposition from mediocre minds. Innovation disturbs comfort.",author:"Albert Einstein"},
+  {text:"He who has a why to live can bear almost any how. Purpose gives strength to endure suffering.",author:"Friedrich Nietzsche"},
+  {text:"That which does not kill us makes us stronger. Adversity sharpens the spirit.",author:"Friedrich Nietzsche"},
+  {text:"There are no facts, only interpretations. Perspective shapes the world we experience.",author:"Friedrich Nietzsche"},
+  {text:"The snake which cannot shed its skin must perish. Minds that refuse change suffer the same fate.",author:"Friedrich Nietzsche"},
+  {text:"The individual has always had to struggle to keep from being overwhelmed by the tribe. Courage begins with independence.",author:"Friedrich Nietzsche"},
+  {text:"The higher we soar, the smaller we appear to those who cannot fly. Greatness is often misunderstood.",author:"Friedrich Nietzsche"},
+  {text:"A book must be the axe for the frozen sea within us. Literature should awaken what lies dormant.",author:"Franz Kafka"},
+  {text:"You are free, and that is why you are lost. Freedom without direction creates confusion.",author:"Franz Kafka"},
+  {text:"Start with what is right rather than what is acceptable. Integrity is rarely convenient.",author:"Franz Kafka"},
+  {text:"In the fight between you and the world, back the world. Reality does not negotiate with emotion.",author:"Franz Kafka"},
+  {text:"Anyone who keeps the ability to see beauty never grows old. Wonder protects the spirit.",author:"Franz Kafka"},
+  {text:"The world itself is just one big hoax. We are just puppets for the corporations.",author:"Mr. Robot"},
+  {text:"Power belongs to the people that take it. Systems only survive because we believe in them.",author:"Mr. Robot"},
+  {text:"Sometimes the truth is the most dangerous virus. Once people see it, they cannot unsee it.",author:"Mr. Robot"},
+  {text:"The system is not broken. It was built this way.",author:"Mr. Robot"},
+  {text:"Reality can be rewritten by those who control the narrative. Information is the ultimate weapon.",author:"Mr. Robot"},
+  {text:"If you have a sense of humor about life, you can survive almost anything. Laughter is a form of armor.",author:"Jimmy Carr"},
+  {text:"Comedy is simply honesty with timing. Truth becomes funny when you remove the filters.",author:"Jimmy Carr"},
+  {text:"The trick to life is perspective. Change the angle and the problem changes shape.",author:"Jimmy Carr"},
+  {text:"A joke is a tiny rebellion against seriousness. Humor disrupts the ordinary.",author:"Jimmy Carr"},
+  {text:"The best comedians observe what everyone else ignores. Insight hides in everyday moments.",author:"Jimmy Carr"},
+  {text:"You are only given a little spark of madness. You must not lose it.",author:"Robin Williams"},
+  {text:"No matter what people tell you, words and ideas can change the world.",author:"Robin Williams"},
+  {text:"Everyone you meet is fighting a battle you know nothing about. Be kind.",author:"Robin Williams"},
+  {text:"The human spirit is stronger than anything that can happen to it. Resilience defines us.",author:"Robin Williams"},
+  {text:"Laughter connects people instantly. Humor dissolves barriers.",author:"Robin Williams"},
+  {text:"Your value in the marketplace determines your income. Increase your value and your income follows.",author:"Patrick Bet-David"},
+  {text:"Execution beats intelligence when intelligence refuses to act. Action compounds results.",author:"Patrick Bet-David"},
+  {text:"If you want a bigger future, build bigger skills. Growth is always a skill problem.",author:"Patrick Bet-David"},
+  {text:"The best entrepreneurs are obsessed with solving problems. Profit follows usefulness.",author:"Patrick Bet-David"},
+  {text:"Great companies are built by people who refuse average standards. Excellence becomes culture.",author:"Patrick Bet-David"},
+  {text:"Discipline is remembering what you want most. Short-term impulses lose to long-term clarity.",author:"Chris Williamson"},
+  {text:"Modern comfort creates weak minds. Voluntary hardship rebuilds strength.",author:"Chris Williamson"},
+  {text:"Self-awareness is a superpower. Most people move through life unconsciously.",author:"Chris Williamson"},
+  {text:"Confidence grows when promises to yourself are kept. Integrity begins internally.",author:"Chris Williamson"},
+  {text:"A meaningful life is built deliberately. Accidental success is rare.",author:"Chris Williamson"},
+  {text:"Success often begins where comfort ends. Growth demands inconvenience.",author:"Unknown"},
+  {text:"The most powerful habit is consistency. Small actions repeated daily create massive change.",author:"Unknown"},
+  {text:"Patience is a competitive advantage in a distracted world. Focus outlasts hype.",author:"Unknown"},
+  {text:"Discipline turns dreams into plans. Plans turn into results.",author:"Unknown"},
+  {text:"Curiosity expands intelligence. Questions open doors that answers close.",author:"Unknown"},
+  {text:"Consistency is louder than promises. Actions prove commitment.",author:"Unknown"},
+  {text:"Momentum builds slowly then suddenly. Persistence triggers breakthroughs.",author:"Unknown"},
+  {text:"Strong character grows from repeated discipline. Integrity compounds quietly.",author:"Unknown"},
+  {text:"Energy flows where attention goes. Direct it wisely.",author:"Unknown"},
+  {text:"Small improvements accumulate dramatically. Marginal gains create massive results.",author:"Unknown"},
+  {text:"The future belongs to adaptive minds. Flexibility defeats rigidity.",author:"Unknown"},
+  {text:"Knowledge becomes wisdom through application. Use what you learn.",author:"Unknown"}
 ];
 
-var KB_ROWS = [
-  ['Q','W','E','R','T','Y','U','I','O','P'],
-  ['A','S','D','F','G','H','J','K','L'],
-  ['Z','X','C','V','B','N','M']
-];
+var KB_ROWS=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['Z','X','C','V','B','N','M']];
 
 function shuffle(a){return[...a].sort(function(){return Math.random()-0.5;});}
 function genWords(n){var r=[];while(r.length<n)r.push.apply(r,shuffle(WORD_POOL));return r.slice(0,n);}
 function heatColor(e,m){
   if(!e||!m)return'#111';
-  var t=Math.min(e/m,1);
-  var v=Math.round(17+t*220);
+  var t=Math.min(e/m,1),v=Math.round(17+t*220);
   return'rgb('+v+','+v+','+v+')';
 }
 
-function TypeMaster(){
-  var s1=useState('time'),     mode=s1[0],           setMode=s1[1];
-  var s2=useState(60),         timeOpt=s2[0],         setTimeOpt=s2[1];
-  var s3=useState(25),         wordsOpt=s3[0],        setWordsOpt=s3[1];
-  var s4=useState([]),         words=s4[0],           setWords=s4[1];
-  var s5=useState(null),       activeQuote=s5[0],     setActiveQuote=s5[1];
-  var s6=useState('idle'),     phase=s6[0],           setPhase=s6[1];
-  var s7=useState([]),         completedWords=s7[0],  setCompletedWords=s7[1];
-  var s8=useState(0),          wordIdx=s8[0],         setWordIdx=s8[1];
-  var s9=useState(''),         curInput=s9[0],        setCurInput=s9[1];
-  var s10=useState(60),        timeLeft=s10[0],       setTimeLeft=s10[1];
-  var s11=useState(0),         liveWpm=s11[0],        setLiveWpm=s11[1];
-  var s12=useState({}),        keyErrors=s12[0],      setKeyErrors=s12[1];
-  var s13=useState([]),        wpmHist=s13[0],        setWpmHist=s13[1];
-  var s14=useState(null),      results=s14[0],        setResults=s14[1];
-  var s15=useState(0),         scrollOffset=s15[0],   setScrollOffset=s15[1];
-  var s16=useState(20),        dimLevel=s16[0],       setDimLevel=s16[1];
-  var s17=useState(false),     showSettings=s17[0],   setShowSettings=s17[1];
+function genPracticeWords(weakKeys,weakBigrams,n){
+  var scored=WORD_POOL.map(function(word){
+    var u=word.toUpperCase(),score=0;
+    weakKeys.forEach(function(k){for(var i=0;i<u.length;i++)if(u[i]===k)score+=3;});
+    weakBigrams.forEach(function(bg){var idx=0;while((idx=u.indexOf(bg,idx))!==-1){score+=6;idx++;}});
+    return {word:word,score:score};
+  });
+  var hits=scored.filter(function(x){return x.score>0;}).sort(function(a,b){return b.score-a.score;});
+  var pool=[];
+  var src=hits.length>0?hits:scored.sort(function(a,b){return b.score-a.score;});
+  var top=src.slice(0,Math.min(src.length,20));
+  while(pool.length<n)pool=pool.concat(shuffle(top.map(function(x){return x.word;})));
+  return pool.slice(0,n);
+}
 
-  var inputRef    = useRef(null);
-  var timerRef    = useRef(null);
-  var wordRefs    = useRef({});
-  var containerRef= useRef(null);
-  var modeRef     = useRef(mode);
-  var timeOptRef  = useRef(timeOpt);
-  var wordsRf     = useRef([]);
-  var completedRf = useRef([]);
-  var wordIdxRf   = useRef(0);
-  var keyErrRf    = useRef({});
-  var wpmHistRf   = useRef([]);
-  var correctRf   = useRef(0);
-  var startRf     = useRef(0);
-  var phaseRef    = useRef('idle');
-  var curInputRef = useRef('');
+function buildAnalysis(errMap,bigramMap){
+  var keys=Object.keys(errMap).sort(function(a,b){return errMap[b]-errMap[a];});
+  var weakKeys=keys.slice(0,4);
+  var bigrams=Object.keys(bigramMap).sort(function(a,b){return bigramMap[b]-bigramMap[a];});
+  var weakBigrams=bigrams.filter(function(bg){return bigramMap[bg]>=2;}).slice(0,3);
+  var practiceWords=genPracticeWords(weakKeys,weakBigrams,50);
+  return {weakKeys:weakKeys,weakBigrams:weakBigrams,practiceWords:practiceWords,errMap:errMap,bigramMap:bigramMap};
+}
+
+function TypeMaster(){
+  var s1=useState('time'),    mode=s1[0],          setMode=s1[1];
+  var s2=useState(60),        timeOpt=s2[0],        setTimeOpt=s2[1];
+  var s3=useState(25),        wordsOpt=s3[0],       setWordsOpt=s3[1];
+  var s4=useState([]),        words=s4[0],          setWords=s4[1];
+  var s5=useState(null),      activeQuote=s5[0],    setActiveQuote=s5[1];
+  var s6=useState('idle'),    phase=s6[0],          setPhase=s6[1];
+  var s7=useState([]),        completedWords=s7[0], setCompletedWords=s7[1];
+  var s8=useState(0),         wordIdx=s8[0],        setWordIdx=s8[1];
+  var s9=useState(''),        curInput=s9[0],       setCurInput=s9[1];
+  var s10=useState(60),       timeLeft=s10[0],      setTimeLeft=s10[1];
+  var s11=useState(0),        liveWpm=s11[0],       setLiveWpm=s11[1];
+  var s12=useState({}),       keyErrors=s12[0],     setKeyErrors=s12[1];
+  var s13=useState([]),       wpmHist=s13[0],       setWpmHist=s13[1];
+  var s14=useState(null),     results=s14[0],       setResults=s14[1];
+  var s15=useState(0),        scrollOffset=s15[0],  setScrollOffset=s15[1];
+  var s16=useState(20),       dimLevel=s16[0],      setDimLevel=s16[1];
+  var s17=useState(false),    showSettings=s17[0],  setShowSettings=s17[1];
+  var s18=useState(0),        quoteCount=s18[0],    setQuoteCount=s18[1];
+  var s19=useState('none'),   practicePhase=s19[0], setPracticePhase=s19[1];
+  var s20=useState(null),     analysisData=s20[0],  setAnalysisData=s20[1];
+  var s21=useState(null),     banner=s21[0],        setBanner=s21[1];
+
+  var inputRef    =useRef(null);
+  var timerRef    =useRef(null);
+  var wordRefs    =useRef({});
+  var containerRef=useRef(null);
+  var modeRef     =useRef(mode);
+  var timeOptRef  =useRef(timeOpt);
+  var wordsRf     =useRef([]);
+  var completedRf =useRef([]);
+  var wordIdxRf   =useRef(0);
+  var keyErrRf    =useRef({});
+  var bigramErrRf =useRef({});
+  var wpmHistRf   =useRef([]);
+  var correctRf   =useRef(0);
+  var startRf     =useRef(0);
+  var phaseRef    =useRef('idle');
+  var curInputRef =useRef('');
+  var quoteCountRf       =useRef(0);
+  var practicePhaseRef   =useRef('none');
+  var quoteStreakErrRf   =useRef({});
+  var quoteStreakBigramRf=useRef({});
+  var practiceBaseRateRf =useRef(0);
 
   useEffect(function(){modeRef.current=mode;},[mode]);
   useEffect(function(){timeOptRef.current=timeOpt;},[timeOpt]);
-
-  /* Scroll so the current word's line is always at the top of the clip window */
+  useEffect(function(){practicePhaseRef.current=practicePhase;},[practicePhase]);
   useEffect(function(){
-    var el = wordRefs.current[wordIdx];
-    if(!el) return;
-    var gap = el.offsetTop > 0 ? 56 : 0;
-    setScrollOffset(Math.max(0, el.offsetTop - gap));
+    if(mode!=='quotes'){
+      quoteCountRf.current=0;setQuoteCount(0);
+      quoteStreakErrRf.current={};quoteStreakBigramRf.current={};
+    }
+  },[mode]);
+  useEffect(function(){
+    var el=wordRefs.current[wordIdx];
+    if(!el)return;
+    var gap=el.offsetTop>0?56:0;
+    setScrollOffset(Math.max(0,el.offsetTop-gap));
   },[wordIdx]);
 
-  var doFinish = useCallback(function(){
+  var doFinish=useCallback(function(){
     clearInterval(timerRef.current);
-    var elapsed = (Date.now()-startRf.current)/1000;
-    var mins    = Math.max(elapsed/60, 0.001);
-    var wpm     = Math.round(correctRf.current/mins)||0;
-    var used    = wordsRf.current.slice(0, completedRf.current.length);
-    var avgLen  = used.length>0 ? used.reduce(function(s,w){return s+w.length;},0)/used.length : 5;
-    var totalCh = completedRf.current.reduce(function(s,c){return s+c.input.length+1;},0);
-    var rawWpm  = Math.round(totalCh/avgLen/mins)||0;
+    var elapsed=(Date.now()-startRf.current)/1000;
+    var mins=Math.max(elapsed/60,0.001);
+    var wpm=Math.round(correctRf.current/mins)||0;
+    var used=wordsRf.current.slice(0,completedRf.current.length);
+    var avgLen=used.length>0?used.reduce(function(s,w){return s+w.length;},0)/used.length:5;
+    var totalCh=completedRf.current.reduce(function(s,c){return s+c.input.length+1;},0);
+    var rawWpm=Math.round(totalCh/avgLen/mins)||0;
+
+    if(practicePhaseRef.current==='drilling'){
+      var totalDrillErr=Object.values(keyErrRf.current).reduce(function(s,v){return s+v;},0);
+      var base=practiceBaseRateRf.current;
+      var msg,btype;
+      if(base===0||totalDrillErr===0){msg='\u2605 Flawless drill! Zero errors on those letters.';btype='great';}
+      else if(totalDrillErr<base*0.55){msg='\u2191 Big improvement! Your accuracy on those letters jumped significantly.';btype='great';}
+      else if(totalDrillErr<base*0.8){msg='\u2191 Getting better! A few more rounds and it will stick.';btype='good';}
+      else{msg='Keep at it \u2014 muscle memory takes time. Consistency wins.';btype='neutral';}
+      setBanner({message:msg,btype:btype});
+      setTimeout(function(){setBanner(null);},6000);
+      setPracticePhase('none');practicePhaseRef.current='none';
+      setResults({wpm:wpm,rawWpm:rawWpm,wpmHist:wpmHistRf.current.slice(),keyErrors:Object.assign({},keyErrRf.current)});
+      setPhase('results');phaseRef.current='results';
+      return;
+    }
+
+    if(modeRef.current==='quotes'){
+      Object.keys(keyErrRf.current).forEach(function(k){
+        quoteStreakErrRf.current[k]=(quoteStreakErrRf.current[k]||0)+keyErrRf.current[k];
+      });
+      Object.keys(bigramErrRf.current).forEach(function(bg){
+        quoteStreakBigramRf.current[bg]=(quoteStreakBigramRf.current[bg]||0)+bigramErrRf.current[bg];
+      });
+      var newCount=quoteCountRf.current+1;
+      quoteCountRf.current=newCount;setQuoteCount(newCount);
+      if(newCount>=3){
+        var aData=buildAnalysis(quoteStreakErrRf.current,quoteStreakBigramRf.current);
+        practiceBaseRateRf.current=Object.values(quoteStreakErrRf.current).reduce(function(s,v){return s+v;},0);
+        quoteStreakErrRf.current={};quoteStreakBigramRf.current={};
+        quoteCountRf.current=0;setQuoteCount(0);
+        setAnalysisData(aData);
+        setPracticePhase('analysis');practicePhaseRef.current='analysis';
+        setPhase('results');phaseRef.current='results';
+        return;
+      }
+    }
+
     setResults({wpm:wpm,rawWpm:rawWpm,wpmHist:wpmHistRf.current.slice(),keyErrors:Object.assign({},keyErrRf.current)});
-    setPhase('results'); phaseRef.current='results';
+    setPhase('results');phaseRef.current='results';
   },[]);
 
-  var init = useCallback(function(){
+  var init=useCallback(function(){
     clearInterval(timerRef.current);
-    wordRefs.current = {};
-    var w, quote=null;
-    if(mode==='quotes'){quote=QUOTES[Math.floor(Math.random()*QUOTES.length)];w=quote.text.split(' ');}
+    wordRefs.current={};
+    var w,quote=null;
+    if(mode==='quotes'){quote=QUOTES[Math.floor(Math.random()*QUOTES.length)];w=quote.text.toLowerCase().split(' ');}
     else if(mode==='words'){w=genWords(wordsOpt);}
     else{w=genWords(350);}
-    wordsRf.current=w; completedRf.current=[]; wordIdxRf.current=0;
-    keyErrRf.current={}; wpmHistRf.current=[]; correctRf.current=0;
-    startRf.current=0; curInputRef.current=''; phaseRef.current='idle';
-    setWords(w); setActiveQuote(quote); setPhase('idle'); setCompletedWords([]);
-    setWordIdx(0); setCurInput(''); setTimeLeft(timeOpt); setLiveWpm(0);
-    setKeyErrors({}); setWpmHist([]); setResults(null); setScrollOffset(0);
+    wordsRf.current=w;completedRf.current=[];wordIdxRf.current=0;
+    keyErrRf.current={};bigramErrRf.current={};wpmHistRf.current=[];correctRf.current=0;
+    startRf.current=0;curInputRef.current='';phaseRef.current='idle';
+    setWords(w);setActiveQuote(quote);setPhase('idle');setCompletedWords([]);
+    setWordIdx(0);setCurInput('');setTimeLeft(timeOpt);setLiveWpm(0);
+    setKeyErrors({});setWpmHist([]);setResults(null);setScrollOffset(0);
+    if(practicePhaseRef.current!=='analysis'){setPracticePhase('none');practicePhaseRef.current='none';}
     setTimeout(function(){if(inputRef.current)inputRef.current.focus();},80);
   },[mode,timeOpt,wordsOpt]);
 
+  var initDrill=useCallback(function(aData){
+    clearInterval(timerRef.current);
+    wordRefs.current={};
+    var w=aData.practiceWords;
+    wordsRf.current=w;completedRf.current=[];wordIdxRf.current=0;
+    keyErrRf.current={};bigramErrRf.current={};wpmHistRf.current=[];correctRf.current=0;
+    startRf.current=0;curInputRef.current='';phaseRef.current='idle';
+    setWords(w);setPhase('idle');setCompletedWords([]);
+    setWordIdx(0);setCurInput('');setLiveWpm(0);
+    setKeyErrors({});setWpmHist([]);setResults(null);setScrollOffset(0);
+    setPracticePhase('drilling');practicePhaseRef.current='drilling';
+    setTimeout(function(){if(inputRef.current)inputRef.current.focus();},80);
+  },[]);
+
   useEffect(function(){init();},[init]);
 
-  var startTyping = useCallback(function(){
-    phaseRef.current='typing'; setPhase('typing'); startRf.current=Date.now();
-    timerRef.current = setInterval(function(){
-      var elapsed = (Date.now()-startRf.current)/1000;
-      var wpm = Math.round(correctRf.current/(elapsed/60))||0;
-      wpmHistRf.current = wpmHistRf.current.concat([{t:Math.round(elapsed),wpm:wpm}]);
-      setWpmHist(wpmHistRf.current.slice());
-      setLiveWpm(wpm);
+  var startTyping=useCallback(function(){
+    phaseRef.current='typing';setPhase('typing');startRf.current=Date.now();
+    timerRef.current=setInterval(function(){
+      var elapsed=(Date.now()-startRf.current)/1000;
+      var wpm=Math.round(correctRf.current/(elapsed/60))||0;
+      wpmHistRf.current=wpmHistRf.current.concat([{t:Math.round(elapsed),wpm:wpm}]);
+      setWpmHist(wpmHistRf.current.slice());setLiveWpm(wpm);
       if(modeRef.current==='time'){
-        var rem = Math.max(0, timeOptRef.current - Math.floor(elapsed));
-        setTimeLeft(rem);
-        if(rem<=0) doFinish();
+        var rem=Math.max(0,timeOptRef.current-Math.floor(elapsed));
+        setTimeLeft(rem);if(rem<=0)doFinish();
       }
     },1000);
   },[doFinish]);
 
-  var handleKeyDown = useCallback(function(e){
+  var handleKeyDown=useCallback(function(e){
     if(e.key==='Tab'||e.key==='Escape'){e.preventDefault();init();return;}
-    if(e.key==='Backspace' && curInputRef.current==='' && wordIdxRf.current>0){
+    if(e.key==='Backspace'&&curInputRef.current===''&&wordIdxRf.current>0){
       e.preventDefault();
-      var pi = wordIdxRf.current-1;
-      var pe = completedRf.current[pi];
+      var pi=wordIdxRf.current-1;
+      var pe=completedRf.current[pi];
       if(!pe)return;
-      completedRf.current = completedRf.current.slice(0,pi);
-      if(pe.ok) correctRf.current = Math.max(0,correctRf.current-1);
-      wordIdxRf.current=pi; curInputRef.current=pe.input;
-      setWordIdx(pi); setCompletedWords(completedRf.current.slice()); setCurInput(pe.input);
+      completedRf.current=completedRf.current.slice(0,pi);
+      if(pe.ok)correctRf.current=Math.max(0,correctRf.current-1);
+      wordIdxRf.current=pi;curInputRef.current=pe.input;
+      setWordIdx(pi);setCompletedWords(completedRf.current.slice());setCurInput(pe.input);
     }
   },[init]);
 
-  var handleChange = useCallback(function(e){
+  var handleChange=useCallback(function(e){
     if(phaseRef.current==='results')return;
-    var val = e.target.value;
-    var prev = curInputRef.current;
-    curInputRef.current = val;
-    if(phaseRef.current!=='typing' && val.trim()) startTyping();
+    var val=e.target.value;
+    var prev=curInputRef.current;
+    curInputRef.current=val;
+    if(phaseRef.current!=='typing'&&val.trim())startTyping();
     if(val.slice(-1)===' '){
-      var input = val.trim();
+      var input=val.trim();
       if(!input){setCurInput('');curInputRef.current='';return;}
-      var target = wordsRf.current[wordIdxRf.current]||'';
-      var ok = input===target;
-      if(ok) correctRf.current++;
-      completedRf.current = completedRf.current.concat([{word:target,input:input,ok:ok}]);
+      var target=wordsRf.current[wordIdxRf.current]||'';
+      var ok=input===target;
+      if(ok)correctRf.current++;
+      completedRf.current=completedRf.current.concat([{word:target,input:input,ok:ok}]);
       setCompletedWords(completedRf.current.slice());
-      var ni = wordIdxRf.current+1;
-      wordIdxRf.current=ni; curInputRef.current='';
-      setWordIdx(ni); setCurInput('');
-      if((mode==='words'||mode==='quotes')&&ni>=wordsRf.current.length) doFinish();
+      var ni=wordIdxRf.current+1;
+      wordIdxRf.current=ni;curInputRef.current='';
+      setWordIdx(ni);setCurInput('');
+      if((mode==='words'||mode==='quotes'||practicePhaseRef.current==='drilling')&&ni>=wordsRf.current.length)doFinish();
       return;
     }
     if(val.length>prev.length){
-      var pos = val.length-1;
-      var typed = val[pos]?val[pos].toUpperCase():'';
-      var expCh = (wordsRf.current[wordIdxRf.current]||'')[pos];
-      var expUp = expCh?expCh.toUpperCase():'';
+      var pos=val.length-1;
+      var typed=val[pos]?val[pos].toUpperCase():'';
+      var expCh=(wordsRf.current[wordIdxRf.current]||'')[pos];
+      var expUp=expCh?expCh.toUpperCase():'';
       if(typed&&expUp&&typed!==expUp){
-        var ne = Object.assign({},keyErrRf.current);
+        var ne=Object.assign({},keyErrRf.current);
         ne[typed]=(ne[typed]||0)+1;
-        keyErrRf.current=ne;
-        setKeyErrors(Object.assign({},ne));
+        keyErrRf.current=ne;setKeyErrors(Object.assign({},ne));
+        if(pos>0){
+          var prevCh=(wordsRf.current[wordIdxRf.current]||'')[pos-1];
+          if(prevCh){
+            var bg2=prevCh.toUpperCase()+expUp;
+            bigramErrRf.current[bg2]=(bigramErrRf.current[bg2]||0)+1;
+          }
+        }
       }
     }
-    /* auto-commit last word without space */
-    var isLastWord = (mode==='quotes'||mode==='words') && wordIdxRf.current === wordsRf.current.length-1;
-    if(isLastWord){
-      var curTarget = wordsRf.current[wordIdxRf.current]||'';
-      if(val === curTarget){
-        var inputF = val;
+    var isLast=(mode==='words'||mode==='quotes'||practicePhaseRef.current==='drilling')&&wordIdxRf.current===wordsRf.current.length-1;
+    if(isLast){
+      var ct=wordsRf.current[wordIdxRf.current]||'';
+      if(val===ct){
         correctRf.current++;
-        completedRf.current = completedRf.current.concat([{word:curTarget,input:inputF,ok:true}]);
+        completedRf.current=completedRf.current.concat([{word:ct,input:val,ok:true}]);
         setCompletedWords(completedRf.current.slice());
-        curInputRef.current='';
-        setCurInput('');
-        doFinish();
-        return;
+        curInputRef.current='';setCurInput('');
+        doFinish();return;
       }
     }
     setCurInput(val);
   },[mode,startTyping,doFinish]);
 
-  var untypedColor = 'rgb('+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+')';
+  var untypedColor='rgb('+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+')';
 
   function renderWord(word,idx){
-    var isCur = idx===wordIdx;
-    var c     = completedWords[idx];
-    var chars = [];
-    var i,j;
-
-    if(idx<wordIdx && c){
+    var isCur=idx===wordIdx,c=completedWords[idx],chars=[],i,j;
+    if(idx<wordIdx&&c){
       for(i=0;i<word.length;i++){
         var tc=c.input[i];
         chars.push(h('span',{key:i,style:{color:(tc!==undefined&&tc===word[i])?CW:CE}},word[i]));
       }
-      for(j=word.length;j<c.input.length;j++){
-        chars.push(h('span',{key:'x'+j,style:{color:CE}},c.input[j]));
-      }
-    } else if(isCur){
+      for(j=word.length;j<c.input.length;j++)chars.push(h('span',{key:'x'+j,style:{color:CE}},c.input[j]));
+    }else if(isCur){
       for(i=0;i<word.length;i++){
-        var tc2=curInput[i];
-        var atCur=(i===curInput.length);
-        var col=CDM;
-        if(tc2!==undefined) col=(tc2===word[i])?CW:CE;
+        var tc2=curInput[i],atCur=(i===curInput.length),col=untypedColor;
+        if(tc2!==undefined)col=(tc2===word[i])?CW:CE;
         chars.push(h('span',{key:i,style:{color:col,borderLeft:atCur?'2px solid #fff':undefined}},word[i]));
       }
-      for(j=word.length;j<curInput.length;j++){
-        chars.push(h('span',{key:'x'+j,style:{color:CE}},curInput[j]));
-      }
-      if(curInput.length>=word.length){
-        chars.push(h('span',{key:'ec',className:'blink',style:{borderLeft:'2px solid #fff'}}));
-      }
-    } else {
-      for(i=0;i<word.length;i++){
-        chars.push(h('span',{key:i,style:{color:untypedColor}},word[i]));
-      }
+      for(j=word.length;j<curInput.length;j++)chars.push(h('span',{key:'x'+j,style:{color:CE}},curInput[j]));
+      if(curInput.length>=word.length)chars.push(h('span',{key:'ec',className:'blink',style:{borderLeft:'2px solid #fff'}}));
+    }else{
+      for(i=0;i<word.length;i++)chars.push(h('span',{key:i,style:{color:untypedColor}},word[i]));
     }
-
-    var cursorEl = (isCur&&curInput.length===0)
-      ? h('span',{className:'blink',style:{position:'absolute',left:-1,top:'8%',height:'84%',borderLeft:'2px solid #fff'}})
-      : null;
-
-    return h('span',{
-      key:idx,
-      ref:function(el){if(el)wordRefs.current[idx]=el;},
-      style:{display:'inline-block',marginRight:'0.65em',fontFamily:FM,fontSize:WORD_SIZE,
-             letterSpacing:'0.02em',position:'relative',lineHeight:LINE_H}
-    }, [cursorEl].concat(chars));
+    var cursorEl=(isCur&&curInput.length===0)?h('span',{className:'blink',style:{position:'absolute',left:-1,top:'8%',height:'84%',borderLeft:'2px solid #fff'}}):null;
+    return h('span',{key:idx,ref:function(el){if(el)wordRefs.current[idx]=el;},
+      style:{display:'inline-block',marginRight:'0.65em',fontFamily:FM,fontSize:WORD_SIZE,letterSpacing:'0.02em',position:'relative',lineHeight:LINE_H}},
+      [cursorEl].concat(chars));
   }
 
-  /* ── RESULTS ── */
-  if(phase==='results'&&results){
-    var maxErr = Math.max.apply(null, Object.values(results.keyErrors).concat([1]));
-    return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS}},
-      h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',
-        padding:'18px 40px',borderBottom:'1px solid #141414'}},
-        h('div',{style:{display:'flex',alignItems:'center',gap:10}},
-          h('span',{style:{fontSize:17,opacity:0.3}},'\u2328'),
-          h('span',{style:{fontFamily:FS,fontSize:16,color:'#555',fontWeight:300,letterSpacing:-0.3}},
-            'Type',h('strong',{style:{fontWeight:900,color:'#ccc',letterSpacing:-0.5}},'Master')
-          )
-        ),
-        h('div',{style:{display:'flex',gap:32,fontFamily:FS,fontSize:11,fontWeight:700,
-          letterSpacing:2,textTransform:'uppercase',color:'#222'}},
-          ['Leaderboard','About','Settings'].map(function(l){
-            return h('span',{key:l,style:{cursor:'pointer'},
-              onClick:l==='Settings'?function(e){e.stopPropagation();setShowSettings(function(v){return !v;});}:undefined,
-              onMouseEnter:function(e){e.currentTarget.style.color='#888';},
-              onMouseLeave:function(e){e.currentTarget.style.color='#222';}
-            },l.toUpperCase());
-          })
-        ),
-        h('div',{style:{fontFamily:FS,fontSize:11,fontWeight:700,letterSpacing:2,color:'#222'}},'\u{1F464}')
+  function renderNav(){
+    return h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 40px',borderBottom:'1px solid #141414'}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+        h('span',{style:{fontSize:17,opacity:0.3}},'\u2328'),
+        h('span',{style:{fontFamily:FS,fontSize:16,color:'#555',fontWeight:300,letterSpacing:-0.3}},
+          'Type',h('strong',{style:{fontWeight:900,color:'#ccc',letterSpacing:-0.5}},'Master'))
       ),
-      h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'56px 36px 80px'}},
-        /* stats row */
-        h('div',{style:{display:'flex',gap:64,marginBottom:72,alignItems:'flex-end'}},
-          StatEl('wpm', results.wpm, CW, 96),
-          StatEl('raw wpm', results.rawWpm, '#666', 96),
-          h('div',{style:{marginLeft:'auto',alignSelf:'center'}},
-            h('button',{onClick:init,
-              onMouseEnter:function(e){e.currentTarget.style.color=CW;e.currentTarget.style.borderColor=CW;},
-              onMouseLeave:function(e){e.currentTarget.style.color=CM;e.currentTarget.style.borderColor='#2a2a2a';},
-              style:{background:'none',border:'1px solid #2a2a2a',color:CM,padding:'12px 44px',
-                     fontFamily:FS,fontSize:11,letterSpacing:4,textTransform:'uppercase',borderRadius:3,transition:'all 0.2s',fontWeight:700}
-            },'↻  RESTART')
+      h('div',{style:{display:'flex',gap:32,fontFamily:FS,fontSize:11,fontWeight:700,letterSpacing:2,textTransform:'uppercase',color:'#222'}},
+        ['Leaderboard','About','Settings'].map(function(l){
+          return h('span',{key:l,style:{cursor:'pointer'},
+            onClick:l==='Settings'?function(e){e.stopPropagation();setShowSettings(function(v){return!v;});}:undefined,
+            onMouseEnter:function(e){e.currentTarget.style.color='#888';},
+            onMouseLeave:function(e){e.currentTarget.style.color='#222';}},l.toUpperCase());
+        })
+      ),
+      mode==='quotes'&&practicePhase!=='drilling'
+        ?h('div',{style:{display:'flex',gap:6,alignItems:'center'}},
+            [0,1,2].map(function(i){
+              return h('div',{key:i,style:{width:7,height:7,borderRadius:'50%',
+                background:i<quoteCount?CW:'#1e1e1e',transition:'background 0.3s',border:'1px solid '+(i<quoteCount?CW:'#333')}});
+            })
+          )
+        :h('div',{style:{fontFamily:FS,fontSize:11,color:'#222'}},'\u{1F464}')
+    );
+  }
+
+  function renderSettings(){
+    if(!showSettings)return null;
+    return h('div',{onClick:function(e){e.stopPropagation();},
+      style:{position:'fixed',top:0,left:0,right:0,bottom:0,zIndex:100,display:'flex',alignItems:'flex-start',justifyContent:'flex-end'}},
+      h('div',{style:{background:'#0f0f0f',border:'1px solid #1e1e1e',borderRadius:8,padding:'28px 32px',margin:'64px 40px 0 0',minWidth:280,boxShadow:'0 8px 40px rgba(0,0,0,0.9)'}},
+        h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:4,textTransform:'uppercase',color:'#444',marginBottom:24}},'SETTINGS'),
+        h('div',{style:{marginBottom:8}},
+          h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:700,letterSpacing:3,textTransform:'uppercase',color:'#333',marginBottom:14}},'UNTYPED TEXT BRIGHTNESS'),
+          h('div',{style:{display:'flex',alignItems:'center',gap:12}},
+            h('span',{style:{fontFamily:FS,fontSize:10,color:'#222',fontWeight:700}},'LOW'),
+            h('input',{type:'range',min:5,max:60,value:dimLevel,onChange:function(e){setDimLevel(Number(e.target.value));},style:{flex:1,accentColor:CW,cursor:'pointer'}}),
+            h('span',{style:{fontFamily:FS,fontSize:10,color:'#555',fontWeight:700}},'HIGH')
+          ),
+          h('div',{style:{display:'flex',justifyContent:'center',marginTop:12}},
+            h('span',{style:{fontFamily:FS,fontSize:11,color:untypedColor,letterSpacing:2}},'preview text brightness')
           )
         ),
-        /* chart */
-        results.wpmHist.length>1 && h('div',{style:{marginBottom:72}},
+        h('button',{onClick:function(){setShowSettings(false);},
+          style:{marginTop:24,width:'100%',background:'none',border:'1px solid #1e1e1e',color:'#333',padding:'9px 0',fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:3,textTransform:'uppercase',borderRadius:4,cursor:'pointer',transition:'all 0.15s'},
+          onMouseEnter:function(e){e.currentTarget.style.borderColor=CW;e.currentTarget.style.color=CW;},
+          onMouseLeave:function(e){e.currentTarget.style.borderColor='#1e1e1e';e.currentTarget.style.color='#333';}},'CLOSE')
+      ),
+      h('div',{onClick:function(){setShowSettings(false);},style:{position:'absolute',inset:0,zIndex:-1}})
+    );
+  }
+
+  function renderBanner(){
+    if(!banner)return null;
+    var isGreat=banner.btype==='great',isGood=banner.btype==='good';
+    var bg=isGreat?'#0a140a':isGood?'#0d120d':'#111';
+    var border=isGreat?'#1a3a1a':isGood?'#1c2e1c':'#1e1e1e';
+    var col=isGreat?'#5aaa5a':isGood?'#4a8a4a':'#444';
+    return h('div',{style:{position:'fixed',bottom:0,left:0,right:0,padding:'15px 40px',
+      background:bg,borderTop:'1px solid '+border,fontFamily:FS,fontSize:11,fontWeight:700,
+      color:col,letterSpacing:2,textTransform:'uppercase',textAlign:'center',
+      animation:'slideUp 0.35s ease',zIndex:200}},banner.message);
+  }
+
+  /* ANALYSIS SCREEN */
+  if(phase==='results'&&practicePhase==='analysis'&&analysisData){
+    var wk=analysisData.weakKeys,wb=analysisData.weakBigrams;
+    var hasErrors=wk.length>0||wb.length>0;
+    return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS}},
+      renderNav(),renderSettings(),renderBanner(),
+      h('div',{style:{maxWidth:860,margin:'0 auto',padding:'64px 36px 80px'}},
+        h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,color:'#333',letterSpacing:4,textTransform:'uppercase',marginBottom:20}},'3 QUOTES COMPLETE'),
+        h('div',{style:{fontFamily:FS,fontSize:hasErrors?52:44,fontWeight:800,color:CW,letterSpacing:-2,lineHeight:1.1,marginBottom:48,whiteSpace:'pre-line'}},
+          hasErrors?"Let's work\non these.":"You're on fire.\nNo weak spots found."
+        ),
+        wk.length>0&&h('div',{style:{marginBottom:40}},
+          h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:4,textTransform:'uppercase',color:'#333',marginBottom:18}},'LETTERS TO DRILL'),
+          h('div',{style:{display:'flex',gap:12,flexWrap:'wrap'}},
+            wk.map(function(key){
+              var cnt=analysisData.errMap[key]||0;
+              return h('div',{key:key,style:{background:'#111',border:'1px solid #222',borderRadius:8,padding:'16px 22px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}},
+                h('span',{style:{fontFamily:FM,fontSize:32,fontWeight:700,color:CW}},key),
+                h('span',{style:{fontFamily:FS,fontSize:9,fontWeight:700,color:'#444',letterSpacing:3}},cnt+' ERROR'+(cnt!==1?'S':'')));
+            })
+          )
+        ),
+        wb.length>0&&h('div',{style:{marginBottom:40}},
+          h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:4,textTransform:'uppercase',color:'#333',marginBottom:18}},'LETTER COMBOS TO DRILL'),
+          h('div',{style:{display:'flex',gap:12,flexWrap:'wrap'}},
+            wb.map(function(bg){
+              var cnt=analysisData.bigramMap[bg]||0;
+              return h('div',{key:bg,style:{background:'#111',border:'1px solid #222',borderRadius:8,padding:'16px 24px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}},
+                h('span',{style:{fontFamily:FM,fontSize:28,fontWeight:700,color:CW,letterSpacing:4}},bg),
+                h('span',{style:{fontFamily:FS,fontSize:9,fontWeight:700,color:'#444',letterSpacing:3}},cnt+' MISS'+(cnt!==1?'ES':'')));
+            })
+          )
+        ),
+        !hasErrors&&h('div',{style:{fontFamily:FS,fontSize:13,color:'#333',letterSpacing:1,marginBottom:40}},'Your accuracy across all three quotes was excellent. Keep it up.'),
+        h('div',{style:{display:'flex',gap:16,marginTop:8}},
+          hasErrors&&h('button',{onClick:function(){initDrill(analysisData);},
+            onMouseEnter:function(e){e.currentTarget.style.background='#1a1a1a';},
+            onMouseLeave:function(e){e.currentTarget.style.background='#111';},
+            style:{background:'#111',border:'1px solid #2a2a2a',color:CW,padding:'14px 36px',fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:3,textTransform:'uppercase',borderRadius:4,cursor:'pointer',transition:'background 0.15s'}},
+            'DRILL THESE LETTERS \u2192'),
+          h('button',{onClick:function(){setPracticePhase('none');practicePhaseRef.current='none';init();},
+            onMouseEnter:function(e){e.currentTarget.style.color=CW;},
+            onMouseLeave:function(e){e.currentTarget.style.color='#333';},
+            style:{background:'none',border:'none',color:'#333',padding:'14px 24px',fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:3,textTransform:'uppercase',cursor:'pointer',transition:'color 0.15s'}},
+            hasErrors?'SKIP':'NEXT QUOTE')
+        )
+      )
+    );
+  }
+
+  /* RESULTS SCREEN */
+  if(phase==='results'&&results&&practicePhase==='none'){
+    var maxErr=Math.max.apply(null,Object.values(results.keyErrors).concat([1]));
+    return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS}},
+      renderNav(),renderSettings(),renderBanner(),
+      h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'50px 36px 80px'}},
+        h('div',{style:{display:'flex',gap:64,marginBottom:64,alignItems:'flex-end'}},
+          StatEl('wpm',results.wpm,CW,96),
+          StatEl('raw wpm',results.rawWpm,'#555',96),
+          h('div',{style:{marginLeft:'auto',alignSelf:'center',display:'flex',flexDirection:'column',gap:12,alignItems:'flex-end'}},
+            mode==='quotes'&&quoteCount>0&&quoteCount<3&&h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,color:'#333',letterSpacing:3,textTransform:'uppercase'}},
+              'QUOTE '+quoteCount+' OF 3'),
+            h('div',{style:{display:'flex',gap:12}},
+              mode==='quotes'&&quoteCount>0&&quoteCount<3&&h('button',{onClick:init,
+                onMouseEnter:function(e){e.currentTarget.style.background='#1a1a1a';},
+                onMouseLeave:function(e){e.currentTarget.style.background='#111';},
+                style:{background:'#111',border:'1px solid #2a2a2a',color:CW,padding:'12px 28px',fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:3,textTransform:'uppercase',borderRadius:3,cursor:'pointer',transition:'background 0.15s'}},
+                'NEXT QUOTE \u2192'),
+              h('button',{onClick:init,
+                onMouseEnter:function(e){e.currentTarget.style.color=CW;e.currentTarget.style.borderColor=CW;},
+                onMouseLeave:function(e){e.currentTarget.style.color=CM;e.currentTarget.style.borderColor='#2a2a2a';},
+                style:{background:'none',border:'1px solid #2a2a2a',color:CM,padding:'12px 28px',fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:3,textTransform:'uppercase',borderRadius:3,cursor:'pointer',transition:'all 0.2s'}},
+                '\u21BB RESTART')
+            )
+          )
+        ),
+        results.wpmHist.length>1&&h('div',{style:{marginBottom:64}},
           Label('wpm over time'),
           h(ResponsiveContainer,{width:'100%',height:200},
             h(LineChart,{data:results.wpmHist,margin:{top:5,right:10,left:-24,bottom:5}},
-              h(XAxis,{dataKey:'t',stroke:'#1a1a1a',tick:{fill:'#333',fontSize:10,fontFamily:FS},
-                label:{value:'s',position:'insideBottomRight',offset:-2,fill:'#333',fontSize:10}}),
+              h(XAxis,{dataKey:'t',stroke:'#1a1a1a',tick:{fill:'#333',fontSize:10,fontFamily:FS},label:{value:'s',position:'insideBottomRight',offset:-2,fill:'#333',fontSize:10}}),
               h(YAxis,{stroke:'#1a1a1a',tick:{fill:'#333',fontSize:10,fontFamily:FS},domain:['auto','auto']}),
-              h(Tooltip,{contentStyle:{background:'#111',border:'1px solid #222',borderRadius:3,
-                fontFamily:FS,fontSize:12,color:CW},
-                formatter:function(v){return[v+' wpm',''];},
-                labelFormatter:function(l){return l+'s';},cursor:{stroke:'#222'}}),
+              h(Tooltip,{contentStyle:{background:'#111',border:'1px solid #222',borderRadius:3,fontFamily:FS,fontSize:12,color:CW},
+                formatter:function(v){return[v+' wpm',''];},labelFormatter:function(l){return l+'s';},cursor:{stroke:'#222'}}),
               h(Line,{type:'monotone',dataKey:'wpm',stroke:CW,strokeWidth:2,dot:false,activeDot:{r:3,fill:CW}})
             )
           )
         ),
-        /* heatmap */
         h('div',null,
           Label('error heatmap'),
           h('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',gap:5}},
             KB_ROWS.map(function(row,ri){
               return h('div',{key:ri,style:{display:'flex',gap:5,marginLeft:ri===1?24:ri===2?48:0}},
                 row.map(function(key){
-                  var err=results.keyErrors[key]||0;
-                  var bg=heatColor(err,maxErr);
-                  var tc2=err/maxErr>0.5?'#000':'#555';
-                  return h('div',{key:key,
-                    title:key+': '+err+' error'+(err!==1?'s':''),
+                  var err=results.keyErrors[key]||0,bg=heatColor(err,maxErr),tc2=err/maxErr>0.5?'#000':'#555';
+                  return h('div',{key:key,title:key+': '+err+' error'+(err!==1?'s':''),
                     onMouseEnter:function(e){e.currentTarget.style.transform='scale(1.1)';},
                     onMouseLeave:function(e){e.currentTarget.style.transform='scale(1)';},
-                    style:{width:48,height:48,background:bg,border:'1px solid '+(err>0?'transparent':'#1c1c1c'),
-                           borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',
-                           justifyContent:'center',transition:'transform 0.1s',cursor:'default'}
-                  },
+                    style:{width:48,height:48,background:bg,border:'1px solid '+(err>0?'transparent':'#1c1c1c'),borderRadius:6,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',transition:'transform 0.1s'}},
                     h('div',{style:{fontFamily:FS,fontSize:13,fontWeight:700,color:tc2}},key),
-                    err>0?h('div',{style:{fontFamily:FS,fontSize:8,color:tc2,opacity:0.8,marginTop:1}},String(err)):null
-                  );
+                    err>0?h('div',{style:{fontFamily:FS,fontSize:8,color:tc2,opacity:0.8,marginTop:1}},String(err)):null);
                 })
               );
             }),
-            h('div',{style:{width:320,height:40,marginTop:5,
-              background:heatColor(results.keyErrors['SPACE']||0,maxErr),
-              border:'1px solid #1c1c1c',borderRadius:6,display:'flex',alignItems:'center',
-              justifyContent:'center',fontFamily:FS,fontWeight:700,fontSize:10,color:'#555',letterSpacing:4}},'SPACE'),
-            Object.keys(results.keyErrors).length===0
-              ?h('div',{style:{fontFamily:FS,fontSize:11,color:'#222',letterSpacing:3,marginTop:20,textTransform:'uppercase',fontWeight:700}},'NO ERRORS')
-              :null
+            h('div',{style:{width:320,height:40,marginTop:5,background:heatColor(results.keyErrors['SPACE']||0,maxErr),border:'1px solid #1c1c1c',borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:FS,fontWeight:700,fontSize:10,color:'#555',letterSpacing:4}},'SPACE'),
+            Object.keys(results.keyErrors).length===0?h('div',{style:{fontFamily:FS,fontSize:11,color:'#222',letterSpacing:3,marginTop:20,textTransform:'uppercase',fontWeight:700}},'NO ERRORS'):null
           )
         )
       )
     );
   }
 
-  /* ── TYPING ── */
-  return h('div',{
-    style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS},
-    onClick:function(){if(inputRef.current)inputRef.current.focus();}
-  },
-    h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',
-    padding:'18px 40px',borderBottom:'1px solid #141414'}},
-    h('div',{style:{display:'flex',alignItems:'center',gap:10}},
-      h('span',{style:{fontSize:17,opacity:0.3}},'⌨'),
-      h('span',{style:{fontFamily:FS,fontSize:16,color:'#555',fontWeight:300,letterSpacing:-0.3}},
-        'Type',h('strong',{style:{fontWeight:900,color:'#ccc',letterSpacing:-0.5}},'Master')
+  /* TYPING / DRILL SCREEN */
+  var isDrilling=practicePhase==='drilling';
+  return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS},onClick:function(){if(inputRef.current)inputRef.current.focus();}},
+    renderNav(),renderSettings(),renderBanner(),
+
+    isDrilling&&analysisData&&h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'20px 36px 0'}},
+      h('div',{style:{display:'inline-flex',alignItems:'center',gap:10,background:'#111',border:'1px solid #1e1e1e',borderRadius:20,padding:'7px 16px'}},
+        h('div',{style:{width:6,height:6,borderRadius:'50%',background:CW,animation:'blink 1.4s step-end infinite'}}),
+        h('span',{style:{fontFamily:FS,fontSize:9,fontWeight:800,letterSpacing:3,color:'#555',textTransform:'uppercase'}},
+          'TARGETED DRILL \u00B7 '+analysisData.weakKeys.concat(analysisData.weakBigrams).join('  '))
       )
     ),
-    h('div',{style:{display:'flex',gap:32,fontFamily:FS,fontSize:11,fontWeight:700,
-      letterSpacing:2,textTransform:'uppercase',color:'#222'}},
-      ['Leaderboard','About','Settings'].map(function(l){
-        return h('span',{key:l,style:{cursor:'pointer'},
-          onClick:l==='Settings'?function(e){e.stopPropagation();setShowSettings(function(v){return !v;});}:undefined,
-          onMouseEnter:function(e){e.currentTarget.style.color='#888';},
-          onMouseLeave:function(e){e.currentTarget.style.color='#222';}
-        },l.toUpperCase());
-      })
-    ),
-    h('div',{style:{fontFamily:FS,fontSize:11,fontWeight:700,letterSpacing:2,color:'#222'}},'👤')
-  ),
 
-    /* settings panel */
-    showSettings && h('div',{
-      onClick:function(e){e.stopPropagation();},
-      style:{position:'fixed',top:0,left:0,right:0,bottom:0,zIndex:100,display:'flex',alignItems:'flex-start',justifyContent:'flex-end'}
-    },
-      h('div',{style:{background:'#0f0f0f',border:'1px solid #1e1e1e',borderRadius:8,
-        padding:'28px 32px',margin:'64px 40px 0 0',minWidth:280,boxShadow:'0 8px 40px rgba(0,0,0,0.8)'}},
-        h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:4,
-          textTransform:'uppercase',color:'#444',marginBottom:24}},'SETTINGS'),
-        h('div',{style:{marginBottom:8}},
-          h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:700,letterSpacing:3,
-            textTransform:'uppercase',color:'#333',marginBottom:14}},'UNTYPED TEXT BRIGHTNESS'),
-          h('div',{style:{display:'flex',alignItems:'center',gap:12}},
-            h('span',{style:{fontFamily:FS,fontSize:10,color:'#222',fontWeight:700}},'LOW'),
-            h('input',{
-              type:'range', min:5, max:60, value:dimLevel,
-              onChange:function(e){setDimLevel(Number(e.target.value));},
-              style:{flex:1,accentColor:CW,cursor:'pointer',height:2}
-            }),
-            h('span',{style:{fontFamily:FS,fontSize:10,color:'#555',fontWeight:700}},'HIGH')
-          ),
-          h('div',{style:{display:'flex',justifyContent:'center',marginTop:10}},
-            h('span',{style:{fontFamily:FS,fontSize:11,color:'rgb('+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+')',letterSpacing:2}},'preview text brightness')
-          )
-        ),
-        h('button',{
-          onClick:function(){setShowSettings(false);},
-          style:{marginTop:24,width:'100%',background:'none',border:'1px solid #1e1e1e',
-            color:'#333',padding:'9px 0',fontFamily:FS,fontSize:10,fontWeight:800,
-            letterSpacing:3,textTransform:'uppercase',borderRadius:4,cursor:'pointer',transition:'all 0.15s'},
-          onMouseEnter:function(e){e.currentTarget.style.borderColor=CW;e.currentTarget.style.color=CW;},
-          onMouseLeave:function(e){e.currentTarget.style.borderColor='#1e1e1e';e.currentTarget.style.color='#333';}
-        },'CLOSE')
-      ),
-      h('div',{onClick:function(){setShowSettings(false);},style:{position:'absolute',inset:0,zIndex:-1}})
-    ),
-
-    /* counter + live wpm */
-    h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'36px 36px 0',
-      display:'flex',justifyContent:'space-between',alignItems:'baseline'}},
+    h('div',{style:{maxWidth:1100,margin:'0 auto',padding:(isDrilling?'16px':'36px')+' 36px 0',display:'flex',justifyContent:'space-between',alignItems:'baseline'}},
       h('span',{style:{fontFamily:FS,fontSize:52,fontWeight:800,color:CW,lineHeight:1,letterSpacing:-2}},
-        mode==='time'?String(timeLeft):wordIdx+' / '+words.length
-      ),
+        mode==='time'?String(timeLeft):wordIdx+' / '+words.length),
       h('span',{style:{fontFamily:FS,fontSize:18,fontWeight:700,color:'#333',letterSpacing:1}},
-        phase==='typing'?liveWpm+' WPM':''
-      )
+        phase==='typing'?liveWpm+' WPM':'')
     ),
 
-    /* mode selector */
-    h('div',{style:{maxWidth:1100,margin:'22px auto 0',padding:'0 36px',
-      display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}},
+    !isDrilling&&h('div',{style:{maxWidth:1100,margin:'22px auto 0',padding:'0 36px',display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}},
       h('div',{style:{display:'flex',background:'#111',borderRadius:6,padding:3,gap:2}},
         [{k:'time',l:'TIME'},{k:'words',l:'WORDS'},{k:'quotes',l:'QUOTES'}].map(function(item){
           var active=mode===item.k;
-          return h('button',{key:item.k,
-            onClick:function(e){e.stopPropagation();setMode(item.k);},
-            style:{background:active?'#1e1e1e':'none',color:active?CW:CM,border:'none',
-                   padding:'7px 20px',borderRadius:4,fontFamily:FS,fontSize:11,
-                   fontWeight:800,letterSpacing:2,transition:'all 0.15s'}
-          },item.l);
+          return h('button',{key:item.k,onClick:function(e){e.stopPropagation();setMode(item.k);},
+            style:{background:active?'#1e1e1e':'none',color:active?CW:CM,border:'none',padding:'7px 20px',borderRadius:4,fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:2,transition:'all 0.15s'}},item.l);
         })
       ),
       h('div',{style:{width:1,height:18,background:'#1e1e1e',margin:'0 4px'}}),
       mode==='time'?[15,30,60].map(function(t){
         return h('button',{key:t,onClick:function(e){e.stopPropagation();setTimeOpt(t);},
-          style:{background:'none',color:timeOpt===t?CW:CM,border:'none',padding:'7px 14px',
-                 fontFamily:FS,fontSize:13,fontWeight:timeOpt===t?800:500,transition:'color 0.15s'}
-        },String(t));
+          style:{background:'none',color:timeOpt===t?CW:CM,border:'none',padding:'7px 14px',fontFamily:FS,fontSize:13,fontWeight:timeOpt===t?800:500,transition:'color 0.15s'}},String(t));
       }):null,
       mode==='words'?[10,25,50,100].map(function(n){
         return h('button',{key:n,onClick:function(e){e.stopPropagation();setWordsOpt(n);},
-          style:{background:'none',color:wordsOpt===n?CW:CM,border:'none',padding:'7px 14px',
-                 fontFamily:FS,fontSize:13,fontWeight:wordsOpt===n?800:500,transition:'color 0.15s'}
-        },String(n));
+          style:{background:'none',color:wordsOpt===n?CW:CM,border:'none',padding:'7px 14px',fontFamily:FS,fontSize:13,fontWeight:wordsOpt===n?800:500,transition:'color 0.15s'}},String(n));
       }):null,
-      (mode==='quotes'&&activeQuote)?h('span',{style:{fontFamily:FS,fontSize:12,color:'#333',
-        fontStyle:'italic',fontWeight:700,marginLeft:4}},'— '+activeQuote.author):null,
+      (mode==='quotes'&&activeQuote)?h('span',{style:{fontFamily:FS,fontSize:12,color:'#333',fontStyle:'italic',fontWeight:700,marginLeft:4}},'— '+activeQuote.author):null,
       h('button',{onClick:function(e){e.stopPropagation();init();},
         onMouseEnter:function(e){e.currentTarget.style.color=CW;},
         onMouseLeave:function(e){e.currentTarget.style.color='#2a2a2a';},
-        style:{marginLeft:'auto',background:'none',border:'none',color:'#2a2a2a',
-               fontFamily:FS,fontSize:22,padding:'0 4px',transition:'color 0.15s',fontWeight:300}
-      },'↻')
+        style:{marginLeft:'auto',background:'none',border:'none',color:'#2a2a2a',fontFamily:FS,fontSize:22,padding:'0 4px',transition:'color 0.15s',fontWeight:300}},'\u21BB')
     ),
 
-    /* ── word display ── */
     h('div',{style:{maxWidth:1100,margin:'30px auto 0',padding:'0 36px',position:'relative'}},
-      /* top fade */
-      h('div',{style:{position:'absolute',top:0,left:36,right:36,height:28,
-        background:'linear-gradient(to bottom,'+BG+' 20%,transparent)',zIndex:10,pointerEvents:'none'}}),
-
-      /* clip window — fixed height, hides overflow */
-      h('div',{ref:containerRef,
-        style:{height:VISIBLE_H+'px',overflow:'hidden',position:'relative'}},
-        /* sliding layer */
-        h('div',{style:{
-          lineHeight:LINE_H,
-          transform:'translateY(-'+scrollOffset+'px)',
-          transition:'transform 0.16s cubic-bezier(0.4,0,0.2,1)',
-          userSelect:'none',
-          paddingTop:'4px'
-        }},
+      h('div',{style:{position:'absolute',top:0,left:36,right:36,height:28,background:'linear-gradient(to bottom,#0a0a0a 20%,transparent)',zIndex:10,pointerEvents:'none'}}),
+      h('div',{ref:containerRef,style:{height:VISIBLE_H+'px',overflow:'hidden',position:'relative'}},
+        h('div',{style:{lineHeight:LINE_H,transform:'translateY(-'+scrollOffset+'px)',transition:'transform 0.16s cubic-bezier(0.4,0,0.2,1)',userSelect:'none',paddingTop:'4px'}},
           words.map(function(word,idx){return renderWord(word,idx);})
         )
       ),
-
-      /* bottom fade */
-      h('div',{style:{position:'absolute',bottom:0,left:36,right:36,height:32,
-        background:'linear-gradient(to top,'+BG+' 20%,transparent)',zIndex:10,pointerEvents:'none'}}),
-
-      /* hidden input */
+      h('div',{style:{position:'absolute',bottom:0,left:36,right:36,height:32,background:'linear-gradient(to top,#0a0a0a 20%,transparent)',zIndex:10,pointerEvents:'none'}}),
       h('input',{ref:inputRef,value:curInput,onChange:handleChange,onKeyDown:handleKeyDown,
         style:{position:'absolute',opacity:0,width:1,height:1,top:0,left:0,pointerEvents:'none'},
         autoComplete:'off',autoCorrect:'off',autoCapitalize:'none',spellCheck:false})
     ),
 
-    /* hint */
-    h('div',{style:{textAlign:'center',marginTop:24,fontFamily:FS,fontSize:10,fontWeight:700,
-      letterSpacing:3,textTransform:'uppercase',transition:'color 0.4s',userSelect:'none',
-      color:phase==='idle'?'#222':'transparent'}},
-      'START TYPING · TAB / ESC TO RESTART · BACKSPACE TO FIX PREVIOUS WORD'
-    )
+    h('div',{style:{textAlign:'center',marginTop:24,fontFamily:FS,fontSize:10,fontWeight:700,letterSpacing:3,textTransform:'uppercase',transition:'color 0.4s',userSelect:'none',color:phase==='idle'?'#222':'transparent'}},
+      isDrilling?'DRILL MODE \u00B7 TAB / ESC TO EXIT':'START TYPING \u00B7 TAB / ESC TO RESTART \u00B7 BACKSPACE TO FIX PREVIOUS WORD')
   );
 }
 
-/* ── helpers ── */
-function StatEl(label, value, color, size){
-  var FS2="'Helvetica Neue',Helvetica,Arial,sans-serif";
+function StatEl(label,value,color,size){
   return h('div',{key:label},
-    h('div',{style:{fontFamily:FS2,fontSize:10,fontWeight:800,color:'#333',letterSpacing:4,
-      textTransform:'uppercase',marginBottom:10}},label.toUpperCase()),
-    h('div',{style:{fontFamily:FS2,fontSize:size,fontWeight:200,color:color,lineHeight:1,letterSpacing:-3}},
-      String(value))
-  );
+    h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,color:'#333',letterSpacing:4,textTransform:'uppercase',marginBottom:10}},label.toUpperCase()),
+    h('div',{style:{fontFamily:FS,fontSize:size,fontWeight:200,color:color,lineHeight:1,letterSpacing:-3}},String(value)));
 }
-
 function Label(text){
-  var FS2="'Helvetica Neue',Helvetica,Arial,sans-serif";
-  return h('div',{style:{fontFamily:FS2,fontSize:10,fontWeight:800,color:'#333',
-    letterSpacing:4,textTransform:'uppercase',marginBottom:22}},text.toUpperCase());
+  return h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,color:'#333',letterSpacing:4,textTransform:'uppercase',marginBottom:22}},text.toUpperCase());
 }
 
-var root = ReactDOM.createRoot(document.getElementById('root'));
+var root=ReactDOM.createRoot(document.getElementById('root'));
 root.render(React.createElement(TypeMaster));
 }); /* end load */
-</script>
+
+  </script>
 </body>
 </html>
