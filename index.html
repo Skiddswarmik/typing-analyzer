@@ -52,19 +52,67 @@ var VISIBLE_H = 195; /* px — fits exactly 3 lines */
 var WORD_POOL = 'the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us great between need large often hand high place hold turn here why help where much through before line right too mean old same tell follow came show form small set put end does another such real thing world keep still own while last school think never open seem together next white children begin got walk example ease paper group always music those both mark book letter until mile river car feet care second enough plain girl usual young ready above ever red list though feel talk bird soon body dog family direct pose leave song measure door product black short numeral off always move try kind hand picture again change play spell air away animal house point letter mother answer found study still learn plant cover food sun four between state keep eye never last let thought city tree cross farm hard start might story saw far sea draw left late run while press close night real life few north open seem together next white'.split(' ').filter(Boolean);
 
 var QUOTES = [
-  {text:'the only way to do great work is to love what you do',author:'Steve Jobs'},
-  {text:'in the middle of every difficulty lies opportunity',author:'Albert Einstein'},
-  {text:'it does not matter how slowly you go as long as you do not stop',author:'Confucius'},
-  {text:'life is what happens when you are busy making other plans',author:'John Lennon'},
-  {text:'the future belongs to those who believe in the beauty of their dreams',author:'Eleanor Roosevelt'},
-  {text:'the way to get started is to quit talking and begin doing',author:'Walt Disney'},
-  {text:'whether you think you can or you think you cannot you are right',author:'Henry Ford'},
-  {text:'never let the fear of striking out keep you from playing the game',author:'Babe Ruth'},
-  {text:'you must be the change you wish to see in the world',author:'Mahatma Gandhi'},
-  {text:'believe you can and you are halfway there',author:'Theodore Roosevelt'},
-  {text:'success is not final failure is not fatal it is the courage to continue that counts',author:'Winston Churchill'},
-  {text:'it always seems impossible until it is done',author:'Nelson Mandela'},
-  {text:'the secret of getting ahead is getting started',author:'Mark Twain'}
+  {text:'The future rewards those who keep moving forward. Change will not come if we wait for someone else or some other time.',author:'Barack Obama'},
+  {text:'Yes we can build a better future, but it requires responsibility. Progress begins when ordinary people decide to participate.',author:'Barack Obama'},
+  {text:'Hope is not blind optimism. Hope is the belief that something better is possible if we work for it.',author:'Barack Obama'},
+  {text:'If you\'re walking down the right path and you\'re willing to keep walking, eventually you\'ll make progress.',author:'Barack Obama'},
+  {text:'We are the change that we seek. Waiting for heroes only delays the work that belongs to us.',author:'Barack Obama'},
+  {text:'A democracy thrives when citizens stay engaged. Silence is often the greatest threat to freedom.',author:'Barack Obama'},
+  {text:'Real leadership is not about power. It is about responsibility to the people you serve.',author:'Barack Obama'},
+  {text:'Imagination is more important than knowledge. Knowledge is limited but imagination encircles the world.',author:'Albert Einstein'},
+  {text:'Life is like riding a bicycle. To keep your balance, you must keep moving.',author:'Albert Einstein'},
+  {text:'A person who never made a mistake never tried anything new. Failure is simply the evidence of experimentation.',author:'Albert Einstein'},
+  {text:'The important thing is not to stop questioning. Curiosity has its own reason for existing.',author:'Albert Einstein'},
+  {text:'Logic will get you from A to B. Imagination will take you everywhere.',author:'Albert Einstein'},
+  {text:'Great spirits have always encountered violent opposition from mediocre minds. Innovation disturbs comfort.',author:'Albert Einstein'},
+  {text:'He who has a why to live can bear almost any how. Purpose gives strength to endure suffering.',author:'Friedrich Nietzsche'},
+  {text:'That which does not kill us makes us stronger. Adversity sharpens the spirit.',author:'Friedrich Nietzsche'},
+  {text:'There are no facts, only interpretations. Perspective shapes the world we experience.',author:'Friedrich Nietzsche'},
+  {text:'The snake which cannot shed its skin must perish. Minds that refuse change suffer the same fate.',author:'Friedrich Nietzsche'},
+  {text:'The individual has always had to struggle to keep from being overwhelmed by the tribe. Courage begins with independence.',author:'Friedrich Nietzsche'},
+  {text:'The higher we soar, the smaller we appear to those who cannot fly. Greatness is often misunderstood.',author:'Friedrich Nietzsche'},
+  {text:'A book must be the axe for the frozen sea within us. Literature should awaken what lies dormant.',author:'Franz Kafka'},
+  {text:'You are free, and that is why you are lost. Freedom without direction creates confusion.',author:'Franz Kafka'},
+  {text:'Start with what is right rather than what is acceptable. Integrity is rarely convenient.',author:'Franz Kafka'},
+  {text:'In the fight between you and the world, back the world. Reality does not negotiate with emotion.',author:'Franz Kafka'},
+  {text:'Anyone who keeps the ability to see beauty never grows old. Wonder protects the spirit.',author:'Franz Kafka'},
+  {text:'The world itself is just one big hoax. We\'re just puppets for the corporations.',author:'Mr. Robot'},
+  {text:'Power belongs to the people that take it. Systems only survive because we believe in them.',author:'Mr. Robot'},
+  {text:'Sometimes the truth is the most dangerous virus. Once people see it, they cannot unsee it.',author:'Mr. Robot'},
+  {text:'The system isn\'t broken. It was built this way.',author:'Mr. Robot'},
+  {text:'Reality can be rewritten by those who control the narrative. Information is the ultimate weapon.',author:'Mr. Robot'},
+  {text:'If you have a sense of humor about life, you can survive almost anything. Laughter is a form of armor.',author:'Jimmy Carr'},
+  {text:'Comedy is simply honesty with timing. Truth becomes funny when you remove the filters.',author:'Jimmy Carr'},
+  {text:'The trick to life is perspective. Change the angle and the problem changes shape.',author:'Jimmy Carr'},
+  {text:'A joke is a tiny rebellion against seriousness. Humor disrupts the ordinary.',author:'Jimmy Carr'},
+  {text:'The best comedians observe what everyone else ignores. Insight hides in everyday moments.',author:'Jimmy Carr'},
+  {text:'You\'re only given a little spark of madness. You mustn\'t lose it.',author:'Robin Williams'},
+  {text:'No matter what people tell you, words and ideas can change the world.',author:'Robin Williams'},
+  {text:'Everyone you meet is fighting a battle you know nothing about. Be kind.',author:'Robin Williams'},
+  {text:'The human spirit is stronger than anything that can happen to it. Resilience defines us.',author:'Robin Williams'},
+  {text:'Laughter connects people instantly. Humor dissolves barriers.',author:'Robin Williams'},
+  {text:'Your value in the marketplace determines your income. Increase your value and your income follows.',author:'Patrick Bet-David'},
+  {text:'Execution beats intelligence when intelligence refuses to act. Action compounds results.',author:'Patrick Bet-David'},
+  {text:'If you want a bigger future, build bigger skills. Growth is always a skill problem.',author:'Patrick Bet-David'},
+  {text:'The best entrepreneurs are obsessed with solving problems. Profit follows usefulness.',author:'Patrick Bet-David'},
+  {text:'Great companies are built by people who refuse average standards. Excellence becomes culture.',author:'Patrick Bet-David'},
+  {text:'Discipline is remembering what you want most. Short-term impulses lose to long-term clarity.',author:'Chris Williamson'},
+  {text:'Modern comfort creates weak minds. Voluntary hardship rebuilds strength.',author:'Chris Williamson'},
+  {text:'Self-awareness is a superpower. Most people move through life unconsciously.',author:'Chris Williamson'},
+  {text:'Confidence grows when promises to yourself are kept. Integrity begins internally.',author:'Chris Williamson'},
+  {text:'A meaningful life is built deliberately. Accidental success is rare.',author:'Chris Williamson'},
+  {text:'Success often begins where comfort ends. Growth demands inconvenience.',author:'Unknown'},
+  {text:'The most powerful habit is consistency. Small actions repeated daily create massive change.',author:'Unknown'},
+  {text:'Patience is a competitive advantage in a distracted world. Focus outlasts hype.',author:'Unknown'},
+  {text:'Discipline turns dreams into plans. Plans turn into results.',author:'Unknown'},
+  {text:'Curiosity expands intelligence. Questions open doors that answers close.',author:'Unknown'},
+  {text:'Consistency is louder than promises. Actions prove commitment.',author:'Unknown'},
+  {text:'Momentum builds slowly then suddenly. Persistence triggers breakthroughs.',author:'Unknown'},
+  {text:'Strong character grows from repeated discipline. Integrity compounds quietly.',author:'Unknown'},
+  {text:'Energy flows where attention goes. Direct it wisely.',author:'Unknown'},
+  {text:'Small improvements accumulate dramatically. Marginal gains create massive results.',author:'Unknown'},
+  {text:'The future belongs to adaptive minds. Flexibility defeats rigidity.',author:'Unknown'},
+  {text:'Knowledge becomes wisdom through application. Use what you learn.',author:'Unknown'}
 ];
 
 var KB_ROWS = [
@@ -98,6 +146,8 @@ function TypeMaster(){
   var s13=useState([]),        wpmHist=s13[0],        setWpmHist=s13[1];
   var s14=useState(null),      results=s14[0],        setResults=s14[1];
   var s15=useState(0),         scrollOffset=s15[0],   setScrollOffset=s15[1];
+  var s16=useState(20),        dimLevel=s16[0],       setDimLevel=s16[1];
+  var s17=useState(false),     showSettings=s17[0],   setShowSettings=s17[1];
 
   var inputRef    = useRef(null);
   var timerRef    = useRef(null);
@@ -218,8 +268,25 @@ function TypeMaster(){
         setKeyErrors(Object.assign({},ne));
       }
     }
+    /* auto-commit last word without space */
+    var isLastWord = (mode==='quotes'||mode==='words') && wordIdxRf.current === wordsRf.current.length-1;
+    if(isLastWord){
+      var curTarget = wordsRf.current[wordIdxRf.current]||'';
+      if(val === curTarget){
+        var inputF = val;
+        correctRf.current++;
+        completedRf.current = completedRf.current.concat([{word:curTarget,input:inputF,ok:true}]);
+        setCompletedWords(completedRf.current.slice());
+        curInputRef.current='';
+        setCurInput('');
+        doFinish();
+        return;
+      }
+    }
     setCurInput(val);
   },[mode,startTyping,doFinish]);
+
+  var untypedColor = 'rgb('+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+')';
 
   function renderWord(word,idx){
     var isCur = idx===wordIdx;
@@ -251,7 +318,7 @@ function TypeMaster(){
       }
     } else {
       for(i=0;i<word.length;i++){
-        chars.push(h('span',{key:i,style:{color:CDM}},word[i]));
+        chars.push(h('span',{key:i,style:{color:untypedColor}},word[i]));
       }
     }
 
@@ -345,6 +412,43 @@ function TypeMaster(){
     onClick:function(){if(inputRef.current)inputRef.current.focus();}
   },
     NavEl(init),
+
+    /* settings panel */
+    showSettings && h('div',{
+      onClick:function(e){e.stopPropagation();},
+      style:{position:'fixed',top:0,left:0,right:0,bottom:0,zIndex:100,display:'flex',alignItems:'flex-start',justifyContent:'flex-end'}
+    },
+      h('div',{style:{background:'#0f0f0f',border:'1px solid #1e1e1e',borderRadius:8,
+        padding:'28px 32px',margin:'64px 40px 0 0',minWidth:280,boxShadow:'0 8px 40px rgba(0,0,0,0.8)'}},
+        h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:4,
+          textTransform:'uppercase',color:'#444',marginBottom:24}},'SETTINGS'),
+        h('div',{style:{marginBottom:8}},
+          h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:700,letterSpacing:3,
+            textTransform:'uppercase',color:'#333',marginBottom:14}},'UNTYPED TEXT BRIGHTNESS'),
+          h('div',{style:{display:'flex',alignItems:'center',gap:12}},
+            h('span',{style:{fontFamily:FS,fontSize:10,color:'#222',fontWeight:700}},'LOW'),
+            h('input',{
+              type:'range', min:5, max:60, value:dimLevel,
+              onChange:function(e){setDimLevel(Number(e.target.value));},
+              style:{flex:1,accentColor:CW,cursor:'pointer',height:2}
+            }),
+            h('span',{style:{fontFamily:FS,fontSize:10,color:'#555',fontWeight:700}},'HIGH')
+          ),
+          h('div',{style:{display:'flex',justifyContent:'center',marginTop:10}},
+            h('span',{style:{fontFamily:FS,fontSize:11,color:'rgb('+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+','+Math.round(dimLevel*2.2)+')',letterSpacing:2}},'preview text brightness')
+          )
+        ),
+        h('button',{
+          onClick:function(){setShowSettings(false);},
+          style:{marginTop:24,width:'100%',background:'none',border:'1px solid #1e1e1e',
+            color:'#333',padding:'9px 0',fontFamily:FS,fontSize:10,fontWeight:800,
+            letterSpacing:3,textTransform:'uppercase',borderRadius:4,cursor:'pointer',transition:'all 0.15s'},
+          onMouseEnter:function(e){e.currentTarget.style.borderColor=CW;e.currentTarget.style.color=CW;},
+          onMouseLeave:function(e){e.currentTarget.style.borderColor='#1e1e1e';e.currentTarget.style.color='#333';}
+        },'CLOSE')
+      ),
+      h('div',{onClick:function(){setShowSettings(false);},style:{position:'absolute',inset:0,zIndex:-1}})
+    ),
 
     /* counter + live wpm */
     h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'36px 36px 0',
@@ -448,7 +552,9 @@ function NavEl(onRestart){
     h('div',{style:{display:'flex',gap:32,fontFamily:FS2,fontSize:11,fontWeight:700,
       letterSpacing:2,textTransform:'uppercase',color:'#222'}},
       ['Leaderboard','About','Settings'].map(function(l){
+        var isSettings = l==='Settings';
         return h('span',{key:l,style:{cursor:'pointer'},
+          onClick: isSettings ? function(e){e.stopPropagation();setShowSettings(function(v){return !v;});} : undefined,
           onMouseEnter:function(e){e.currentTarget.style.color='#888';},
           onMouseLeave:function(e){e.currentTarget.style.color='#222';}
         },l.toUpperCase());
