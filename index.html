@@ -172,7 +172,8 @@ function TypeMaster(){
   useEffect(function(){
     var el = wordRefs.current[wordIdx];
     if(!el) return;
-    setScrollOffset(el.offsetTop);
+    var gap = el.offsetTop > 0 ? 56 : 0;
+    setScrollOffset(Math.max(0, el.offsetTop - gap));
   },[wordIdx]);
 
   var doFinish = useCallback(function(){
@@ -338,7 +339,26 @@ function TypeMaster(){
   if(phase==='results'&&results){
     var maxErr = Math.max.apply(null, Object.values(results.keyErrors).concat([1]));
     return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS}},
-      NavEl(init),
+      h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',
+        padding:'18px 40px',borderBottom:'1px solid #141414'}},
+        h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+          h('span',{style:{fontSize:17,opacity:0.3}},'\u2328'),
+          h('span',{style:{fontFamily:FS,fontSize:16,color:'#555',fontWeight:300,letterSpacing:-0.3}},
+            'Type',h('strong',{style:{fontWeight:900,color:'#ccc',letterSpacing:-0.5}},'Master')
+          )
+        ),
+        h('div',{style:{display:'flex',gap:32,fontFamily:FS,fontSize:11,fontWeight:700,
+          letterSpacing:2,textTransform:'uppercase',color:'#222'}},
+          ['Leaderboard','About','Settings'].map(function(l){
+            return h('span',{key:l,style:{cursor:'pointer'},
+              onClick:l==='Settings'?function(e){e.stopPropagation();setShowSettings(function(v){return !v;});}:undefined,
+              onMouseEnter:function(e){e.currentTarget.style.color='#888';},
+              onMouseLeave:function(e){e.currentTarget.style.color='#222';}
+            },l.toUpperCase());
+          })
+        ),
+        h('div',{style:{fontFamily:FS,fontSize:11,fontWeight:700,letterSpacing:2,color:'#222'}},'\u{1F464}')
+      ),
       h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'56px 36px 80px'}},
         /* stats row */
         h('div',{style:{display:'flex',gap:64,marginBottom:72,alignItems:'flex-end'}},
@@ -411,7 +431,26 @@ function TypeMaster(){
     style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS},
     onClick:function(){if(inputRef.current)inputRef.current.focus();}
   },
-    NavEl(init),
+    h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',
+    padding:'18px 40px',borderBottom:'1px solid #141414'}},
+    h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+      h('span',{style:{fontSize:17,opacity:0.3}},'⌨'),
+      h('span',{style:{fontFamily:FS,fontSize:16,color:'#555',fontWeight:300,letterSpacing:-0.3}},
+        'Type',h('strong',{style:{fontWeight:900,color:'#ccc',letterSpacing:-0.5}},'Master')
+      )
+    ),
+    h('div',{style:{display:'flex',gap:32,fontFamily:FS,fontSize:11,fontWeight:700,
+      letterSpacing:2,textTransform:'uppercase',color:'#222'}},
+      ['Leaderboard','About','Settings'].map(function(l){
+        return h('span',{key:l,style:{cursor:'pointer'},
+          onClick:l==='Settings'?function(e){e.stopPropagation();setShowSettings(function(v){return !v;});}:undefined,
+          onMouseEnter:function(e){e.currentTarget.style.color='#888';},
+          onMouseLeave:function(e){e.currentTarget.style.color='#222';}
+        },l.toUpperCase());
+      })
+    ),
+    h('div',{style:{fontFamily:FS,fontSize:11,fontWeight:700,letterSpacing:2,color:'#222'}},'👤')
+  ),
 
     /* settings panel */
     showSettings && h('div',{
@@ -539,31 +578,6 @@ function TypeMaster(){
 }
 
 /* ── helpers ── */
-function NavEl(onRestart){
-  var FS2="'Helvetica Neue',Helvetica,Arial,sans-serif";
-  return h('nav',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',
-    padding:'18px 40px',borderBottom:'1px solid #141414'}},
-    h('div',{style:{display:'flex',alignItems:'center',gap:10}},
-      h('span',{style:{fontSize:17,opacity:0.3}},'⌨'),
-      h('span',{style:{fontFamily:FS2,fontSize:16,color:'#555',fontWeight:300,letterSpacing:-0.3}},
-        'Type',h('strong',{style:{fontWeight:900,color:'#ccc',letterSpacing:-0.5}},'Master')
-      )
-    ),
-    h('div',{style:{display:'flex',gap:32,fontFamily:FS2,fontSize:11,fontWeight:700,
-      letterSpacing:2,textTransform:'uppercase',color:'#222'}},
-      ['Leaderboard','About','Settings'].map(function(l){
-        var isSettings = l==='Settings';
-        return h('span',{key:l,style:{cursor:'pointer'},
-          onClick: isSettings ? function(e){e.stopPropagation();setShowSettings(function(v){return !v;});} : undefined,
-          onMouseEnter:function(e){e.currentTarget.style.color='#888';},
-          onMouseLeave:function(e){e.currentTarget.style.color='#222';}
-        },l.toUpperCase());
-      })
-    ),
-    h('div',{style:{fontFamily:FS2,fontSize:11,fontWeight:700,letterSpacing:2,color:'#222'}},'👤')
-  );
-}
-
 function StatEl(label, value, color, size){
   var FS2="'Helvetica Neue',Helvetica,Arial,sans-serif";
   return h('div',{key:label},
