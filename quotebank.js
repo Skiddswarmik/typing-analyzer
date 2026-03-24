@@ -1,4 +1,5 @@
-var QUOTES=[
+/* quotebank.js — place in the same folder as typemaster.html */
+var QUOTES = [
   {text:"The future rewards those who keep moving forward. Change will not come if we wait for someone else or some other time.",author:"Barack Obama"},
   {text:"Yes we can build a better future, but it requires responsibility. Progress begins when ordinary people decide to participate.",author:"Barack Obama"},
   {text:"Hope is not blind optimism. Hope is the belief that something better is possible if we work for it.",author:"Barack Obama"},
