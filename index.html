@@ -19,8 +19,9 @@ button{cursor:pointer}
 </head>
 <body>
   <div id="root"></div>
-  <!-- Optional: place wordbank.js in the same folder to use your own word list -->
+  <!-- Optional custom banks — place in same folder as typemaster.html -->
   <script src="wordbank.js"></script>
+  <script src="quotebank.js"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
@@ -41,69 +42,8 @@ var WORD_SIZE='1.55rem',LINE_H='3.6rem',VISIBLE_H=195;
 /* Use external wordbank.js if loaded, fall back to built-in pool */
 var WORD_POOL='the be to of and a in that have it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us great between need large often hand high place hold turn here why help where much through before line right too mean old same tell follow came show form small set put end does another such real thing world keep still own while last school think never open seem together next white children begin got walk example ease paper group always music those both mark book letter until mile river car feet care second enough plain girl usual young ready above ever red list though feel talk bird soon body dog family direct pose leave song measure door product black short numeral off always move try kind hand picture again change play spell air away animal house point letter mother answer found study still learn plant cover food sun four between state keep eye never last let thought city tree cross farm hard start might story saw far sea draw left late run while press close night real life few north open seem together next white'.split(' ').filter(Boolean);
 
-var QUOTES=[
-  {text:"The future rewards those who keep moving forward. Change will not come if we wait for someone else or some other time.",author:"Barack Obama"},
-  {text:"Yes we can build a better future, but it requires responsibility. Progress begins when ordinary people decide to participate.",author:"Barack Obama"},
-  {text:"Hope is not blind optimism. Hope is the belief that something better is possible if we work for it.",author:"Barack Obama"},
-  {text:"If you're walking down the right path and you're willing to keep walking, eventually you'll make progress.",author:"Barack Obama"},
-  {text:"We are the change that we seek. Waiting for heroes only delays the work that belongs to us.",author:"Barack Obama"},
-  {text:"A democracy thrives when citizens stay engaged. Silence is often the greatest threat to freedom.",author:"Barack Obama"},
-  {text:"Real leadership is not about power. It is about responsibility to the people you serve.",author:"Barack Obama"},
-  {text:"Imagination is more important than knowledge. Knowledge is limited but imagination encircles the world.",author:"Albert Einstein"},
-  {text:"Life is like riding a bicycle. To keep your balance, you must keep moving.",author:"Albert Einstein"},
-  {text:"A person who never made a mistake never tried anything new. Failure is simply the evidence of experimentation.",author:"Albert Einstein"},
-  {text:"The important thing is not to stop questioning. Curiosity has its own reason for existing.",author:"Albert Einstein"},
-  {text:"Logic will get you from A to B. Imagination will take you everywhere.",author:"Albert Einstein"},
-  {text:"Great spirits have always encountered violent opposition from mediocre minds. Innovation disturbs comfort.",author:"Albert Einstein"},
-  {text:"He who has a why to live can bear almost any how. Purpose gives strength to endure suffering.",author:"Friedrich Nietzsche"},
-  {text:"That which does not kill us makes us stronger. Adversity sharpens the spirit.",author:"Friedrich Nietzsche"},
-  {text:"There are no facts, only interpretations. Perspective shapes the world we experience.",author:"Friedrich Nietzsche"},
-  {text:"The snake which cannot shed its skin must perish. Minds that refuse change suffer the same fate.",author:"Friedrich Nietzsche"},
-  {text:"The individual has always had to struggle to keep from being overwhelmed by the tribe. Courage begins with independence.",author:"Friedrich Nietzsche"},
-  {text:"The higher we soar, the smaller we appear to those who cannot fly. Greatness is often misunderstood.",author:"Friedrich Nietzsche"},
-  {text:"A book must be the axe for the frozen sea within us. Literature should awaken what lies dormant.",author:"Franz Kafka"},
-  {text:"You are free, and that is why you are lost. Freedom without direction creates confusion.",author:"Franz Kafka"},
-  {text:"Start with what is right rather than what is acceptable. Integrity is rarely convenient.",author:"Franz Kafka"},
-  {text:"In the fight between you and the world, back the world. Reality does not negotiate with emotion.",author:"Franz Kafka"},
-  {text:"Anyone who keeps the ability to see beauty never grows old. Wonder protects the spirit.",author:"Franz Kafka"},
-  {text:"The world itself is just one big hoax. We are just puppets for the corporations.",author:"Mr. Robot"},
-  {text:"Power belongs to the people that take it. Systems only survive because we believe in them.",author:"Mr. Robot"},
-  {text:"Sometimes the truth is the most dangerous virus. Once people see it, they cannot unsee it.",author:"Mr. Robot"},
-  {text:"The system is not broken. It was built this way.",author:"Mr. Robot"},
-  {text:"Reality can be rewritten by those who control the narrative. Information is the ultimate weapon.",author:"Mr. Robot"},
-  {text:"If you have a sense of humor about life, you can survive almost anything. Laughter is a form of armor.",author:"Jimmy Carr"},
-  {text:"Comedy is simply honesty with timing. Truth becomes funny when you remove the filters.",author:"Jimmy Carr"},
-  {text:"The trick to life is perspective. Change the angle and the problem changes shape.",author:"Jimmy Carr"},
-  {text:"A joke is a tiny rebellion against seriousness. Humor disrupts the ordinary.",author:"Jimmy Carr"},
-  {text:"The best comedians observe what everyone else ignores. Insight hides in everyday moments.",author:"Jimmy Carr"},
-  {text:"You are only given a little spark of madness. You must not lose it.",author:"Robin Williams"},
-  {text:"No matter what people tell you, words and ideas can change the world.",author:"Robin Williams"},
-  {text:"Everyone you meet is fighting a battle you know nothing about. Be kind.",author:"Robin Williams"},
-  {text:"The human spirit is stronger than anything that can happen to it. Resilience defines us.",author:"Robin Williams"},
-  {text:"Laughter connects people instantly. Humor dissolves barriers.",author:"Robin Williams"},
-  {text:"Your value in the marketplace determines your income. Increase your value and your income follows.",author:"Patrick Bet-David"},
-  {text:"Execution beats intelligence when intelligence refuses to act. Action compounds results.",author:"Patrick Bet-David"},
-  {text:"If you want a bigger future, build bigger skills. Growth is always a skill problem.",author:"Patrick Bet-David"},
-  {text:"The best entrepreneurs are obsessed with solving problems. Profit follows usefulness.",author:"Patrick Bet-David"},
-  {text:"Great companies are built by people who refuse average standards. Excellence becomes culture.",author:"Patrick Bet-David"},
-  {text:"Discipline is remembering what you want most. Short-term impulses lose to long-term clarity.",author:"Chris Williamson"},
-  {text:"Modern comfort creates weak minds. Voluntary hardship rebuilds strength.",author:"Chris Williamson"},
-  {text:"Self-awareness is a superpower. Most people move through life unconsciously.",author:"Chris Williamson"},
-  {text:"Confidence grows when promises to yourself are kept. Integrity begins internally.",author:"Chris Williamson"},
-  {text:"A meaningful life is built deliberately. Accidental success is rare.",author:"Chris Williamson"},
-  {text:"Success often begins where comfort ends. Growth demands inconvenience.",author:"Unknown"},
-  {text:"The most powerful habit is consistency. Small actions repeated daily create massive change.",author:"Unknown"},
-  {text:"Patience is a competitive advantage in a distracted world. Focus outlasts hype.",author:"Unknown"},
-  {text:"Discipline turns dreams into plans. Plans turn into results.",author:"Unknown"},
-  {text:"Curiosity expands intelligence. Questions open doors that answers close.",author:"Unknown"},
-  {text:"Consistency is louder than promises. Actions prove commitment.",author:"Unknown"},
-  {text:"Momentum builds slowly then suddenly. Persistence triggers breakthroughs.",author:"Unknown"},
-  {text:"Strong character grows from repeated discipline. Integrity compounds quietly.",author:"Unknown"},
-  {text:"Energy flows where attention goes. Direct it wisely.",author:"Unknown"},
-  {text:"Small improvements accumulate dramatically. Marginal gains create massive results.",author:"Unknown"},
-  {text:"The future belongs to adaptive minds. Flexibility defeats rigidity.",author:"Unknown"},
-  {text:"Knowledge becomes wisdom through application. Use what you learn.",author:"Unknown"}
-];
+/* QUOTES loaded from quotebank.js */
+
 
 var KB_ROWS=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['Z','X','C','V','B','N','M']];
 
@@ -181,6 +121,56 @@ function genFingerWords(selectedIds,n){
   return words;
 }
 
+
+var PUNCT_CHARS=[',','.',';','-','!','?'];
+var NUM_CHARS=['0','1','2','3','4','5','6','7','8','9'];
+
+/* Generate words balanced so every 4 words totals exactly 20 chars */
+function genBalancedWords(n, withPunct, withNums){
+  var pool=getWordPool();
+  var byLen={};
+  for(var l=2;l<=9;l++) byLen[l]=pool.filter(function(w){return w.length===l;});
+  /* fallback: pool grouped by length */
+  function pickLen(targetLen){
+    var bucket=byLen[targetLen];
+    if(!bucket||bucket.length===0){
+      /* find nearest available */
+      for(var d=1;d<8;d++){
+        if(byLen[targetLen-d]&&byLen[targetLen-d].length>0){bucket=byLen[targetLen-d];break;}
+        if(byLen[targetLen+d]&&byLen[targetLen+d].length>0){bucket=byLen[targetLen+d];break;}
+      }
+    }
+    if(!bucket||bucket.length===0) bucket=pool;
+    var w=bucket[Math.floor(Math.random()*bucket.length)];
+    if(withPunct&&Math.random()<0.12) w+=PUNCT_CHARS[Math.floor(Math.random()*PUNCT_CHARS.length)];
+    if(withNums&&Math.random()<0.08) w=w.slice(0,Math.max(1,w.length-1))+NUM_CHARS[Math.floor(Math.random()*NUM_CHARS.length)];
+    return w;
+  }
+  var result=[];
+  /* fill in groups of 4 summing to 20 */
+  while(result.length<n){
+    /* pick 3 words randomly with lengths 3-6, 4th fills the gap */
+    var lens=[3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4)];
+    var remaining=20-lens[0]-lens[1]-lens[2];
+    if(remaining<2||remaining>9){lens=[4,5,5];remaining=6;}
+    lens.push(remaining);
+    shuffle(lens).forEach(function(l){result.push(pickLen(l));});
+  }
+  return result.slice(0,n);
+}
+
+/* Generate number-only words, 3-7 digits each */
+function genNumberWords(n){
+  var result=[];
+  for(var i=0;i<n;i++){
+    var len=3+Math.floor(Math.random()*5);
+    var w='';
+    for(var j=0;j<len;j++) w+=NUM_CHARS[Math.floor(Math.random()*10)];
+    result.push(w);
+  }
+  return result;
+}
+
 function TypeMaster(){
   var s1=useState('time'),    mode=s1[0],          setMode=s1[1];
   var s2=useState(60),        timeOpt=s2[0],        setTimeOpt=s2[1];
@@ -205,6 +195,10 @@ function TypeMaster(){
   var s21=useState(null),     banner=s21[0],        setBanner=s21[1];
   var s22=useState([]),       selFingers=s22[0],    setSelFingers=s22[1];
   var s23=useState('time'),   fingerSub=s23[0],     setFingerSub=s23[1];
+  var s24=useState(false),    usePunct=s24[0],      setUsePunct=s24[1];
+  var s25=useState(false),    useNums=s25[0],       setUseNums=s25[1];
+  var s26=useState(false),    numsOnly=s26[0],      setNumsOnly=s26[1];
+  var s27=useState(null),     drillNotif=s27[0],    setDrillNotif=s27[1];
 
   var inputRef    =useRef(null);
   var timerRef    =useRef(null);
@@ -228,6 +222,12 @@ function TypeMaster(){
   var quoteStreakBigramRf=useRef({});
   var practiceBaseRateRf =useRef(0);
   var selFingersRf=useRef([]);
+  var usePunctRf=useRef(false);
+  var useNumsRf=useRef(false);
+  var numsOnlyRf=useRef(false);
+  useEffect(function(){usePunctRf.current=usePunct;},[usePunct]);
+  useEffect(function(){useNumsRf.current=useNums;},[useNums]);
+  useEffect(function(){numsOnlyRf.current=numsOnly;},[numsOnly]);
   var fingerSubRef=useRef('time');
   useEffect(function(){selFingersRf.current=selFingers;},[selFingers]);
   useEffect(function(){fingerSubRef.current=fingerSub;},[fingerSub]);
@@ -289,9 +289,11 @@ function TypeMaster(){
         quoteStreakErrRf.current={};quoteStreakBigramRf.current={};
         quoteCountRf.current=0;setQuoteCount(0);
         setAnalysisData(aData);
-        setPracticePhase('analysis');practicePhaseRef.current='analysis';
-        setPhase('results');phaseRef.current='results';
-        return;
+        /* show notification bubble instead of navigating away */
+        if(aData.weakKeys.length>0||aData.weakBigrams.length>0){
+          setDrillNotif({analysisData:aData});
+        }
+        /* fall through to normal results */
       }
     }
 
@@ -304,9 +306,10 @@ function TypeMaster(){
     wordRefs.current={};
     var w,quote=null;
     if(mode==='quotes'){quote=QUOTES[Math.floor(Math.random()*QUOTES.length)];w=quote.text.toLowerCase().split(' ');}
-    else if(mode==='words'){w=genWords(wordsOpt);}
+    else if(mode==='numbers'||numsOnlyRf.current){w=genNumberWords(fingerSubRef.current==='time'?300:wordsOpt);}
+    else if(mode==='words'){w=genBalancedWords(wordsOpt,usePunctRf.current,useNumsRf.current);}
     else if(mode==='fingers'){w=genFingerWords(selFingersRf.current,fingerSubRef.current==='time'?300:wordsOpt);}
-    else{w=genWords(350);}
+    else{w=genBalancedWords(350,usePunctRf.current,useNumsRf.current);}
     wordsRf.current=w;completedRf.current=[];wordIdxRf.current=0;
     keyErrRf.current={};bigramErrRf.current={};wpmHistRf.current=[];correctRf.current=0;
     startRf.current=0;curInputRef.current='';phaseRef.current='idle';
@@ -340,7 +343,7 @@ function TypeMaster(){
       var wpm=Math.round(correctRf.current/(elapsed/60))||0;
       wpmHistRf.current=wpmHistRf.current.concat([{t:Math.round(elapsed),wpm:wpm}]);
       setWpmHist(wpmHistRf.current.slice());setLiveWpm(wpm);
-      if(modeRef.current==='time'||(modeRef.current==='fingers'&&fingerSubRef.current==='time')){
+      if(modeRef.current==='time'||(modeRef.current==='fingers'&&fingerSubRef.current==='time')||(modeRef.current==='numbers'&&fingerSubRef.current==='time')){
         var rem=Math.max(0,timeOptRef.current-Math.floor(elapsed));
         setTimeLeft(rem);if(rem<=0)doFinish();
       }
@@ -378,7 +381,7 @@ function TypeMaster(){
       var ni=wordIdxRf.current+1;
       wordIdxRf.current=ni;curInputRef.current='';
       setWordIdx(ni);setCurInput('');
-      if((mode==='words'||mode==='quotes'||mode==='fingers'||practicePhaseRef.current==='drilling')&&ni>=wordsRf.current.length)doFinish();
+      if((mode==='words'||mode==='quotes'||mode==='fingers'||mode==='numbers'||practicePhaseRef.current==='drilling')&&ni>=wordsRf.current.length)doFinish();
       return;
     }
     if(val.length>prev.length){
@@ -399,7 +402,7 @@ function TypeMaster(){
         }
       }
     }
-    var isLast=(mode==='words'||mode==='quotes'||mode==='fingers'||practicePhaseRef.current==='drilling')&&wordIdxRf.current===wordsRf.current.length-1;
+    var isLast=(mode==='words'||mode==='quotes'||mode==='fingers'||mode==='numbers'||practicePhaseRef.current==='drilling')&&wordIdxRf.current===wordsRf.current.length-1;
     if(isLast){
       var ct=wordsRf.current[wordIdxRf.current]||'';
       if(val===ct){
@@ -569,6 +572,42 @@ function TypeMaster(){
     );
   }
 
+
+  function renderDrillNotif(){
+    if(!drillNotif||!drillNotif.analysisData)return null;
+    var ad=drillNotif.analysisData;
+    var wk=ad.weakKeys,wb=ad.weakBigrams;
+    var label=wk.concat(wb).slice(0,4).join('  ');
+    return h('div',{style:{position:'fixed',top:20,right:24,zIndex:300,
+      background:'#fff',color:'#000',borderRadius:12,padding:'18px 22px',
+      boxShadow:'0 8px 40px rgba(0,0,0,0.8)',maxWidth:300,fontFamily:FS}},
+      h('div',{style:{fontSize:11,fontWeight:800,letterSpacing:3,textTransform:'uppercase',marginBottom:6,color:'#000'}},'3 QUOTES DONE'),
+      h('div',{style:{fontSize:13,fontWeight:700,color:'#111',marginBottom:4,lineHeight:1.4}},
+        'Weak spots found: '),
+      h('div',{style:{fontFamily:FM,fontSize:16,fontWeight:700,color:'#000',letterSpacing:4,marginBottom:14}},label),
+      h('div',{style:{fontSize:11,color:'#555',marginBottom:16,lineHeight:1.5}},
+        'Want to drill these letters now?'),
+      h('div',{style:{display:'flex',gap:10}},
+        h('button',{
+          onClick:function(){setDrillNotif(null);initDrill(ad);},
+          onMouseEnter:function(e){e.currentTarget.style.background='#222';},
+          onMouseLeave:function(e){e.currentTarget.style.background='#000';},
+          style:{background:'#000',color:'#fff',border:'none',borderRadius:6,
+            padding:'9px 18px',fontFamily:FS,fontSize:10,fontWeight:800,
+            letterSpacing:2,textTransform:'uppercase',cursor:'pointer',transition:'background 0.15s',flex:1}
+        },'TRY NOW'),
+        h('button',{
+          onClick:function(){setDrillNotif(null);},
+          onMouseEnter:function(e){e.currentTarget.style.background='#222';},
+          onMouseLeave:function(e){e.currentTarget.style.background='#000';},
+          style:{background:'#000',color:'#fff',border:'none',borderRadius:6,
+            padding:'9px 18px',fontFamily:FS,fontSize:10,fontWeight:800,
+            letterSpacing:2,textTransform:'uppercase',cursor:'pointer',transition:'background 0.15s'}
+        },'DISMISS')
+      )
+    );
+  }
+
   function renderBanner(){
     if(!banner)return null;
     var isGreat=banner.btype==='great',isGood=banner.btype==='good';
@@ -581,61 +620,11 @@ function TypeMaster(){
       animation:'slideUp 0.35s ease',zIndex:200}},banner.message);
   }
 
-  /* ANALYSIS SCREEN */
-  if(phase==='results'&&practicePhase==='analysis'&&analysisData){
-    var wk=analysisData.weakKeys,wb=analysisData.weakBigrams;
-    var hasErrors=wk.length>0||wb.length>0;
-    return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS}},
-      renderNav(),renderSettings(),renderBanner(),
-      h('div',{style:{maxWidth:860,margin:'0 auto',padding:'64px 36px 80px'}},
-        h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,color:'#333',letterSpacing:4,textTransform:'uppercase',marginBottom:20}},'3 QUOTES COMPLETE'),
-        h('div',{style:{fontFamily:FS,fontSize:hasErrors?52:44,fontWeight:800,color:CW,letterSpacing:-2,lineHeight:1.1,marginBottom:48,whiteSpace:'pre-line'}},
-          hasErrors?"Let's work\non these.":"You're on fire.\nNo weak spots found."
-        ),
-        wk.length>0&&h('div',{style:{marginBottom:40}},
-          h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:4,textTransform:'uppercase',color:'#333',marginBottom:18}},'LETTERS TO DRILL'),
-          h('div',{style:{display:'flex',gap:12,flexWrap:'wrap'}},
-            wk.map(function(key){
-              var cnt=analysisData.errMap[key]||0;
-              return h('div',{key:key,style:{background:'#111',border:'1px solid #222',borderRadius:8,padding:'16px 22px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}},
-                h('span',{style:{fontFamily:FM,fontSize:32,fontWeight:700,color:CW}},key),
-                h('span',{style:{fontFamily:FS,fontSize:9,fontWeight:700,color:'#444',letterSpacing:3}},cnt+' ERROR'+(cnt!==1?'S':'')));
-            })
-          )
-        ),
-        wb.length>0&&h('div',{style:{marginBottom:40}},
-          h('div',{style:{fontFamily:FS,fontSize:10,fontWeight:800,letterSpacing:4,textTransform:'uppercase',color:'#333',marginBottom:18}},'LETTER COMBOS TO DRILL'),
-          h('div',{style:{display:'flex',gap:12,flexWrap:'wrap'}},
-            wb.map(function(bg){
-              var cnt=analysisData.bigramMap[bg]||0;
-              return h('div',{key:bg,style:{background:'#111',border:'1px solid #222',borderRadius:8,padding:'16px 24px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}},
-                h('span',{style:{fontFamily:FM,fontSize:28,fontWeight:700,color:CW,letterSpacing:4}},bg),
-                h('span',{style:{fontFamily:FS,fontSize:9,fontWeight:700,color:'#444',letterSpacing:3}},cnt+' MISS'+(cnt!==1?'ES':'')));
-            })
-          )
-        ),
-        !hasErrors&&h('div',{style:{fontFamily:FS,fontSize:13,color:'#333',letterSpacing:1,marginBottom:40}},'Your accuracy across all three quotes was excellent. Keep it up.'),
-        h('div',{style:{display:'flex',gap:16,marginTop:8}},
-          hasErrors&&h('button',{onClick:function(){initDrill(analysisData);},
-            onMouseEnter:function(e){e.currentTarget.style.background='#1a1a1a';},
-            onMouseLeave:function(e){e.currentTarget.style.background='#111';},
-            style:{background:'#111',border:'1px solid #2a2a2a',color:CW,padding:'14px 36px',fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:3,textTransform:'uppercase',borderRadius:4,cursor:'pointer',transition:'background 0.15s'}},
-            'DRILL THESE LETTERS \u2192'),
-          h('button',{onClick:function(){setPracticePhase('none');practicePhaseRef.current='none';init();},
-            onMouseEnter:function(e){e.currentTarget.style.color=CW;},
-            onMouseLeave:function(e){e.currentTarget.style.color='#333';},
-            style:{background:'none',border:'none',color:'#333',padding:'14px 24px',fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:3,textTransform:'uppercase',cursor:'pointer',transition:'color 0.15s'}},
-            hasErrors?'SKIP':'NEXT QUOTE')
-        )
-      )
-    );
-  }
-
   /* RESULTS SCREEN */
   if(phase==='results'&&results&&practicePhase==='none'){
     var maxErr=Math.max.apply(null,Object.values(results.keyErrors).concat([1]));
     return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS}},
-      renderNav(),renderSettings(),renderBanner(),
+      renderNav(),renderSettings(),renderBanner(),renderDrillNotif(),
       h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'50px 36px 80px'}},
         h('div',{style:{display:'flex',gap:64,marginBottom:64,alignItems:'flex-end'}},
           StatEl('wpm',results.wpm,CW,96),
@@ -696,7 +685,7 @@ function TypeMaster(){
   /* TYPING / DRILL SCREEN */
   var isDrilling=practicePhase==='drilling';
   return h('div',{style:{minHeight:'100vh',background:BG,color:CW,fontFamily:FS},onClick:function(){if(inputRef.current)inputRef.current.focus();}},
-    renderNav(),renderSettings(),renderBanner(),
+    renderNav(),renderSettings(),renderBanner(),renderDrillNotif(),
 
     isDrilling&&analysisData&&h('div',{style:{maxWidth:1100,margin:'0 auto',padding:'20px 36px 0'}},
       h('div',{style:{display:'inline-flex',alignItems:'center',gap:10,background:'#111',border:'1px solid #1e1e1e',borderRadius:20,padding:'7px 16px'}},
@@ -708,14 +697,14 @@ function TypeMaster(){
 
     h('div',{style:{maxWidth:1100,margin:'0 auto',padding:(isDrilling?'16px':'36px')+' 36px 0',display:'flex',justifyContent:'space-between',alignItems:'baseline'}},
       h('span',{style:{fontFamily:FS,fontSize:52,fontWeight:800,color:CW,lineHeight:1,letterSpacing:-2}},
-        (mode==='time'||(mode==='fingers'&&fingerSubRef.current==='time'))?String(timeLeft):wordIdx+' / '+words.length),
+        (mode==='time'||(mode==='fingers'&&fingerSubRef.current==='time')||(mode==='numbers'&&fingerSubRef.current==='time'))?String(timeLeft):wordIdx+' / '+words.length),
       h('span',{style:{fontFamily:FS,fontSize:18,fontWeight:700,color:uiColor,letterSpacing:1}},
         phase==='typing'?liveWpm+' WPM':'')
     ),
 
     !isDrilling&&h('div',{style:{maxWidth:1100,margin:'22px auto 0',padding:'0 36px',display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}},
       h('div',{style:{display:'flex',background:'#111',borderRadius:6,padding:3,gap:2}},
-        [{k:'time',l:'TIME'},{k:'words',l:'WORDS'},{k:'quotes',l:'QUOTES'},{k:'fingers',l:'FINGERS'}].map(function(item){
+        [{k:'time',l:'TIME'},{k:'words',l:'WORDS'},{k:'quotes',l:'QUOTES'},{k:'numbers',l:'NUMBERS'},{k:'fingers',l:'FINGERS'}].map(function(item){
           var active=mode===item.k;
           return h('button',{key:item.k,onClick:function(e){e.stopPropagation();setMode(item.k);},
             style:{background:active?'#1e1e1e':'none',color:active?CW:uiColor,border:'none',padding:'7px 20px',borderRadius:4,fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:2,transition:'all 0.15s'}},item.l);
@@ -730,7 +719,26 @@ function TypeMaster(){
         return h('button',{key:n,onClick:function(e){e.stopPropagation();setWordsOpt(n);},
           style:{background:'none',color:wordsOpt===n?CW:uiColor,border:'none',padding:'7px 14px',fontFamily:FS,fontSize:13,fontWeight:wordsOpt===n?800:500,transition:'color 0.15s'}},String(n));
       }):null,
+      (mode==='time'||mode==='words')?h('div',{style:{display:'flex',gap:2,marginLeft:4}},
+        h('button',{onClick:function(e){e.stopPropagation();setUsePunct(function(v){return!v;});},
+          style:{background:'none',color:usePunct?CW:uiColor,border:'none',padding:'7px 10px',fontFamily:FS,fontSize:11,fontWeight:usePunct?800:400,transition:'color 0.15s',letterSpacing:1}},
+          '@ punct'),
+        h('button',{onClick:function(e){e.stopPropagation();setUseNums(function(v){return!v;});},
+          style:{background:'none',color:useNums?CW:uiColor,border:'none',padding:'7px 10px',fontFamily:FS,fontSize:11,fontWeight:useNums?800:400,transition:'color 0.15s',letterSpacing:1}},
+          '# nums')
+      ):null,
       (mode==='quotes'&&activeQuote)?h('span',{style:{fontFamily:FS,fontSize:12,color:'#333',fontStyle:'italic',fontWeight:700,marginLeft:4}},'— '+activeQuote.author):null,
+      (mode==='numbers')?h('div',{style:{display:'flex',alignItems:'center',gap:2}},
+        [15,30,60].map(function(t){return h('button',{key:'nt'+t,
+          onClick:function(e){e.stopPropagation();setTimeOpt(t);setFingerSub('time');},
+          style:{background:'none',color:(fingerSub==='time'&&timeOpt===t)?CW:uiColor,border:'none',
+            padding:'7px 12px',fontFamily:FS,fontSize:12,fontWeight:(fingerSub==='time'&&timeOpt===t)?800:500,transition:'color 0.15s'}},t+'s');}),
+        h('div',{style:{width:1,height:14,background:'#1e1e1e',margin:'0 4px'}}),
+        [10,25,50].map(function(n){return h('button',{key:'nw'+n,
+          onClick:function(e){e.stopPropagation();setWordsOpt(n);setFingerSub('words');},
+          style:{background:'none',color:(fingerSub==='words'&&wordsOpt===n)?CW:uiColor,border:'none',
+            padding:'7px 12px',fontFamily:FS,fontSize:12,fontWeight:(fingerSub==='words'&&wordsOpt===n)?800:500,transition:'color 0.15s'}},n+' w');})
+      ):null,
       mode==='fingers'?h('div',{style:{display:'flex',alignItems:'center',gap:2}},
         [15,30,60].map(function(t){return h('button',{key:'ft'+t,
           onClick:function(e){e.stopPropagation();setTimeOpt(t);setFingerSub('time');},
@@ -748,7 +756,7 @@ function TypeMaster(){
         style:{marginLeft:'auto',background:'none',border:'none',color:uiColorDim,fontFamily:FS,fontSize:22,padding:'0 4px',transition:'color 0.15s',fontWeight:300}},'\u21BB')
     ),
 
-    mode==='fingers'&&!isDrilling&&renderFingerSelector(),
+    mode==='fingers'&&!isDrilling&&!numsOnly&&renderFingerSelector(),
 
     h('div',{style:{maxWidth:1100,margin:'30px auto 0',padding:'0 36px',position:'relative'}},
       h('div',{style:{position:'absolute',top:0,left:36,right:36,height:28,background:'linear-gradient(to bottom,#0a0a0a 20%,transparent)',zIndex:10,pointerEvents:'none'}}),
