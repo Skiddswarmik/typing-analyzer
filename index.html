@@ -2,22 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TypeMaster</title>
+<title>TypeMaster Vanilla</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{background:#0a0a0a;color:#e8e8e8;font-family:monospace}
-button{cursor:pointer}
-.notification{
-  position:fixed;top:20px;right:20px;
-  background:white;color:black;
-  padding:16px;border-radius:8px;
-  box-shadow:0 8px 30px rgba(0,0,0,0.4);
-  z-index:999;
+body{
+  background:#0a0a0a;
+  color:#e8e8e8;
+  font-family:monospace;
+  padding:20px;
 }
+
+#words span{
+  margin-right:10px;
+  color:#555;
+}
+
+#words .active{
+  color:#fff;
+}
+
+input{
+  margin-top:20px;
+  padding:10px;
+  width:100%;
+  background:#111;
+  color:#fff;
+  border:1px solid #333;
+}
+
+.controls{
+  margin-bottom:20px;
+}
+
+.notification{
+  position:fixed;
+  top:20px;
+  right:20px;
+  background:white;
+  color:black;
+  padding:16px;
+  border-radius:8px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.4);
+}
+
 .notification button{
-  background:black;color:white;border:none;
-  padding:8px 12px;margin-right:8px;
+  background:black;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  margin-right:8px;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -25,67 +60,80 @@ button{cursor:pointer}
 <body>
 
 <script src="quotes.js"></script>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-<div id="root"></div>
+<div class="controls">
+  <label><input type="checkbox" id="punctuation"> punctuation</label>
+  <label><input type="checkbox" id="numbers"> numbers</label>
+  <label><input type="checkbox" id="numbersOnly"> numbers only</label>
+</div>
+
+<h2 id="wpm">0 WPM</h2>
+<h3 id="raw"></h3>
+
+<div id="words"></div>
+<input id="input" autofocus>
+
+<div id="notification"></div>
 
 <script>
-const h = React.createElement;
-const {useState,useEffect,useRef} = React;
-
 const WORD_POOL = "the quick brown fox jumps over lazy dog typing speed keyboard practice improve skill accuracy focus consistency".split(" ");
 
-function randomInt(min,max){
-  return Math.floor(Math.random()*(max-min+1))+min;
+let words=[], index=0, input="", start=null;
+let typedWords=[];
+let quoteCount=0;
+
+const inputEl = document.getElementById("input");
+const wordsEl = document.getElementById("words");
+const wpmEl = document.getElementById("wpm");
+const rawEl = document.getElementById("raw");
+const notificationEl = document.getElementById("notification");
+
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+function numberWord(){
+  let len=rand(3,7), s="";
+  for(let i=0;i<len;i++) s+=rand(0,9);
+  return s;
 }
 
-function randomNumberWord(){
-  let len = randomInt(3,7);
-  let str="";
-  for(let i=0;i<len;i++) str+=randomInt(0,9);
-  return str;
-}
-
-function injectExtras(word, usePunc, useNum){
-  if(usePunc && Math.random()<0.2){
-    const p = [".",",","!","?"];
-    word += p[randomInt(0,p.length-1)];
+function inject(word){
+  if(document.getElementById("punctuation").checked && Math.random()<0.2){
+    const p=[".",",","!","?"];
+    word+=p[rand(0,p.length-1)];
   }
-  if(useNum && Math.random()<0.2){
-    word += randomInt(0,9);
+  if(document.getElementById("numbers").checked && Math.random()<0.2){
+    word+=rand(0,9);
   }
   return word;
 }
 
-function genWords(n, options){
-  const {punctuation, numbers, numbersOnly} = options;
-  let result = [];
+function genWords(n){
+  let result=[];
 
   function pick(target){
-    let candidates = WORD_POOL.filter(w=>Math.abs(w.length-target)<=2);
-    if(candidates.length===0) candidates = WORD_POOL;
-    return candidates[randomInt(0,candidates.length-1)];
+    let c=WORD_POOL.filter(w=>Math.abs(w.length-target)<=2);
+    if(!c.length) c=WORD_POOL;
+    return c[rand(0,c.length-1)];
   }
 
   while(result.length<n){
     let chunk=[], total=0;
 
     for(let i=0;i<4;i++){
-      let remaining = 20-total;
-      let slots = 4-i;
-      let target = Math.round(remaining/slots);
+      let remaining=20-total;
+      let slots=4-i;
+      let target=Math.round(remaining/slots);
 
       let word;
-      if(numbersOnly){
-        word = randomNumberWord();
+      if(document.getElementById("numbersOnly").checked){
+        word=numberWord();
       }else{
-        word = pick(target);
-        word = injectExtras(word,punctuation,numbers);
+        word=pick(target);
+        word=inject(word);
       }
 
       chunk.push(word);
-      total += word.length;
+      total+=word.length;
     }
 
     result.push(...chunk);
@@ -94,100 +142,94 @@ function genWords(n, options){
   return result.slice(0,n);
 }
 
-function App(){
-  const [words,setWords] = useState([]);
-  const [input,setInput] = useState("");
-  const [index,setIndex] = useState(0);
-  const [start,setStart] = useState(null);
-  const [wpm,setWpm] = useState(0);
-  const [results,setResults] = useState(null);
-  const [quoteCount,setQuoteCount] = useState(0);
-  const [notification,setNotification] = useState(null);
-
-  const [punctuation,setPunctuation]=useState(false);
-  const [numbers,setNumbers]=useState(false);
-  const [numbersOnly,setNumbersOnly]=useState(false);
-
-  const ref = useRef([]);
-
-  function init(){
-    setWords(genWords(40,{punctuation,numbers,numbersOnly}));
-    setIndex(0);
-    setInput("");
-    setStart(null);
-    setResults(null);
-  }
-
-  useEffect(init,[punctuation,numbers,numbersOnly]);
-
-  function finish(){
-    let mins=(Date.now()-start)/60000;
-    let chars = ref.current.reduce((s,w)=>s+w.length,0);
-    let raw = Math.round((chars/5)/mins);
-    setResults(raw);
-
-    let newCount = quoteCount+1;
-    setQuoteCount(newCount);
-
-    if(newCount>=3){
-      setNotification(true);
-      setQuoteCount(0);
-    }
-  }
-
-  function handle(e){
-    let val=e.target.value;
-
-    if(!start) setStart(Date.now());
-
-    if(val.endsWith(" ")){
-      ref.current.push(val.trim());
-      setIndex(i=>i+1);
-      setInput("");
-
-      if(index>=words.length-1) finish();
-      return;
-    }
-
-    setInput(val);
-
-    if(start){
-      let mins=(Date.now()-start)/60000;
-      let chars = ref.current.reduce((s,w)=>s+w.length,0)+val.length;
-      setWpm(Math.round((chars/5)/mins)||0);
-    }
-  }
-
-  return h("div",{},
-    notification && h("div",{className:"notification"},
-      h("div",{},"Practice weak keys now?"),
-      h("div",{},
-        h("button",{onClick:()=>{setNotification(false);init();}},"TRY NOW"),
-        h("button",{onClick:()=>setNotification(false)},"DISMISS")
-      )
-    ),
-
-    h("div",{},
-      h("label",{},h("input",{type:"checkbox",checked:punctuation,onChange:()=>setPunctuation(!punctuation)})," punctuation"),
-      h("label",{},h("input",{type:"checkbox",checked:numbers,onChange:()=>setNumbers(!numbers)})," numbers"),
-      h("label",{},h("input",{type:"checkbox",checked:numbersOnly,onChange:()=>setNumbersOnly(!numbersOnly)})," numbers only")
-    ),
-
-    h("h2",{},wpm+" WPM"),
-
-    h("div",{},
-      words.map((w,i)=>
-        h("span",{key:i,style:{marginRight:10,color:i===index?"white":"#555"}},w)
-      )
-    ),
-
-    h("input",{value:input,onChange:handle,autoFocus:true}),
-
-    results && h("h1",{},"RAW WPM: "+results)
-  );
+function renderWords(){
+  wordsEl.innerHTML="";
+  words.forEach((w,i)=>{
+    let span=document.createElement("span");
+    span.textContent=w;
+    if(i===index) span.classList.add("active");
+    wordsEl.appendChild(span);
+  });
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+function init(){
+  words=genWords(40);
+  index=0;
+  typedWords=[];
+  input="";
+  start=null;
+  rawEl.textContent="";
+  inputEl.value="";
+  renderWords();
+}
+
+function finish(){
+  let mins=(Date.now()-start)/60000;
+
+  let totalChars=typedWords.reduce((s,w)=>s+w.length,0);
+  let rawWpm=Math.round((totalChars/5)/mins)||0;
+
+  rawEl.textContent="RAW WPM: "+rawWpm;
+
+  quoteCount++;
+  if(quoteCount>=3){
+    showNotification();
+    quoteCount=0;
+  }
+}
+
+function showNotification(){
+  notificationEl.innerHTML=`
+    <div class="notification">
+      <div>Practice weak keys now?</div>
+      <div style="margin-top:10px;">
+        <button onclick="tryNow()">TRY NOW</button>
+        <button onclick="dismiss()">DISMISS</button>
+      </div>
+    </div>
+  `;
+}
+
+function tryNow(){
+  notificationEl.innerHTML="";
+  init();
+}
+
+function dismiss(){
+  notificationEl.innerHTML="";
+}
+
+inputEl.addEventListener("input",(e)=>{
+  let val=e.target.value;
+
+  if(!start) start=Date.now();
+
+  if(val.endsWith(" ")){
+    typedWords.push(val.trim());
+    index++;
+    inputEl.value="";
+
+    if(index>=words.length){
+      finish();
+    }
+
+    renderWords();
+    return;
+  }
+
+  let elapsed=(Date.now()-start)/60000;
+  let chars=typedWords.reduce((s,w)=>s+w.length,0)+val.length;
+  let wpm=Math.round((chars/5)/elapsed)||0;
+
+  wpmEl.textContent=wpm+" WPM";
+});
+
+document.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+  cb.addEventListener("change",init);
+});
+
+init();
 </script>
+
 </body>
 </html>
