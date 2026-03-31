@@ -125,16 +125,18 @@ function genFingerWords(selectedIds,n){
 var PUNCT_CHARS=[',','.',';','-','!','?'];
 var NUM_CHARS=['0','1','2','3','4','5','6','7','8','9'];
 
-/* Generate words balanced so every 4 words totals exactly 20 chars */
+/* Distribution matching real English typing (MonkeyType analysis):
+   14% 2-letter, 10% 3-letter, 34% 4-letter, 24% 5-letter, 10% 6-letter, 4% 7-letter, 4% 8-letter
+   Groups of 4 words average 17 chars (4.25/word) matching natural English ~4.31/word */
 function genBalancedWords(n, withPunct, withNums){
   var pool=getWordPool();
   var byLen={};
   for(var l=2;l<=9;l++) byLen[l]=pool.filter(function(w){return w.length===l;});
-  /* fallback: pool grouped by length */
+  /* Length weights: [2,3,4,5,6,7,8] */
+  var LEN_DIST=[2,2,4,4,4,4,4,4,4,5,5,5,5,5,6,6,7,8];
   function pickLen(targetLen){
     var bucket=byLen[targetLen];
     if(!bucket||bucket.length===0){
-      /* find nearest available */
       for(var d=1;d<8;d++){
         if(byLen[targetLen-d]&&byLen[targetLen-d].length>0){bucket=byLen[targetLen-d];break;}
         if(byLen[targetLen+d]&&byLen[targetLen+d].length>0){bucket=byLen[targetLen+d];break;}
@@ -147,28 +149,40 @@ function genBalancedWords(n, withPunct, withNums){
     return w;
   }
   var result=[];
-  /* fill in groups of 4 summing to 20 */
+  /* Groups of 4 words summing to 17 chars (matching ~4.25 avg = real English 4.31) */
   while(result.length<n){
-    /* pick 3 words randomly with lengths 3-6, 4th fills the gap */
-    var lens=[3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4)];
-    var remaining=20-lens[0]-lens[1]-lens[2];
-    if(remaining<2||remaining>9){lens=[4,5,5];remaining=6;}
-    lens.push(remaining);
+    /* Pick 3 from weighted distribution, 4th fills to reach 17 */
+    var lens=[
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)],
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)],
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)]
+    ];
+    var rem=17-lens[0]-lens[1]-lens[2];
+    if(rem<2||rem>8){
+      /* fallback: natural 4-word combo */
+      lens=[4,4,5,4]; rem=4;
+    }
+    lens.push(rem);
     shuffle(lens).forEach(function(l){result.push(pickLen(l));});
   }
   return result.slice(0,n);
 }
 
 
-/* Random letters - balanced 4 words = 20 letters */
+/* Random letters - balanced 4 words = 17 chars (~4.25 avg matching natural English) */
 function genLetterWords(n){
   var vowels='aeiou'.split('');
   var cons='bcdfghjklmnpqrstvwxyz'.split('');
+  var LEN_DIST=[2,2,4,4,4,4,4,4,4,5,5,5,5,5,6,6,7,8];
   var result=[];
   while(result.length<n){
-    var lens=[3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4)];
-    var rem=20-lens[0]-lens[1]-lens[2];
-    if(rem<2||rem>9){lens=[4,5,5];rem=6;}
+    var lens=[
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)],
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)],
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)]
+    ];
+    var rem=17-lens[0]-lens[1]-lens[2];
+    if(rem<2||rem>8){lens=[4,4,5,4];rem=4;}
     lens.push(rem);
     shuffle(lens).forEach(function(l){
       var word='',startV=Math.random()<0.35;
@@ -183,13 +197,18 @@ function genLetterWords(n){
   return result.slice(0,n);
 }
 
-/* Numbers - balanced 4 words = 20 digits */
+/* Numbers - balanced 4 words = 17 digits (~4.25 avg matching natural English) */
 function genNumberWords(n){
+  var LEN_DIST=[2,2,4,4,4,4,4,4,4,5,5,5,5,5,6,6,7,8];
   var result=[];
   while(result.length<n){
-    var lens=[3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4),3+Math.floor(Math.random()*4)];
-    var rem=20-lens[0]-lens[1]-lens[2];
-    if(rem<3||rem>7){lens=[5,5,5];rem=5;}
+    var lens=[
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)],
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)],
+      LEN_DIST[Math.floor(Math.random()*LEN_DIST.length)]
+    ];
+    var rem=17-lens[0]-lens[1]-lens[2];
+    if(rem<2||rem>8){lens=[4,4,5,4];rem=4;}
     lens.push(rem);
     shuffle(lens).forEach(function(l){
       var w='';
@@ -200,21 +219,11 @@ function genNumberWords(n){
   return result.slice(0,n);
 }
 
-var CALIBRATOR_POOL='quick brown fox jumps over lazy dog sphinx quartz glyph fjord waltz nymph vex jab zinc wavy cozy kept flux quiz buxom'.split(' ')
-  .concat('job jaw jet joy jazz joke join jury key kid kin kit kick keep king kind knob'.split(' '))
-  .concat('fix mix six box hex max taxi exam exact excel jazz fizz'.split(' '))
-  .concat('zip zoo zone zero zinc zoom maze size fuzz buzz'.split(' '))
-  .concat('van vet via vow very vest vain vast void view vote vibe vine'.split(' '))
-  .concat('wax web wig win wit woe woke walk wave well wind warp'.split(' '))
-  .concat('pan pat paw pay pen pet pig pin pit pop pod pro pub'.split(' '))
-  .concat('yak yam yap yen yet yew yip your yoga yolk'.split(' '))
-  .concat('had ham hat hay hem hex hid hip hub hug hum husk'.split(' '))
-  .concat('gab gap gas gel gem gut gym glow grip'.split(' '))
-  .concat('fab fad fan fat fax fib fig fit fog fly flux'.split(' '));
 
 
 function TypeMaster(){
   var s1=useState('time'),    mode=s1[0],          setMode=s1[1];
+  var s1b=useState('normal'), subMode=s1b[0],      setSubMode=s1b[1];
   var s2=useState(60),        timeOpt=s2[0],        setTimeOpt=s2[1];
   var s3=useState(25),        wordsOpt=s3[0],       setWordsOpt=s3[1];
   var s4=useState([]),        words=s4[0],          setWords=s4[1];
@@ -244,6 +253,7 @@ function TypeMaster(){
   var s28=useState(''),       zenText=s28[0],       setZenText=s28[1];
 
   var inputRef    =useRef(null);
+  var restartBtnRef=useRef(null);
   var timerRef    =useRef(null);
   var wordRefs    =useRef({});
   var containerRef=useRef(null);
@@ -276,8 +286,10 @@ function TypeMaster(){
   useEffect(function(){useNumsRf.current=useNums;},[useNums]);
   useEffect(function(){numsOnlyRf.current=numsOnly;},[numsOnly]);
   var fingerSubRef=useRef('time');
+  var subModeRef=useRef('normal');
   useEffect(function(){selFingersRf.current=selFingers;},[selFingers]);
   useEffect(function(){fingerSubRef.current=fingerSub;},[fingerSub]);
+  useEffect(function(){subModeRef.current=subMode;},[subMode]);
 
   useEffect(function(){modeRef.current=mode;},[mode]);
   useEffect(function(){timeOptRef.current=timeOpt;},[timeOpt]);
@@ -299,11 +311,11 @@ function TypeMaster(){
     clearInterval(timerRef.current);
     var elapsed=(Date.now()-startRf.current)/1000;
     var mins=Math.max(elapsed/60,0.001);
-    var wpm=Math.round(correctRf.current/mins)||0;
-    var used=wordsRf.current.slice(0,completedRf.current.length);
-    var avgLen=used.length>0?used.reduce(function(s,w){return s+w.length;},0)/used.length:5;
+    /* Industry-standard WPM: every 5 chars (incl space) = 1 'word' */
+    var correctChars=completedRf.current.reduce(function(s,c){return c.ok?s+c.word.length+1:s;},0);
     var totalCh=completedRf.current.reduce(function(s,c){return s+c.input.length+1;},0);
-    var rawWpm=Math.round(totalCh/avgLen/mins)||0;
+    var wpm=Math.round(correctChars/5/mins)||0;
+    var rawWpm=Math.round(totalCh/5/mins)||0;
     var kps=Math.round((correctKsRf.current/elapsed)*10)/10;
     var rawKps=Math.round((allKsRf.current/elapsed)*10)/10;
 
@@ -354,15 +366,17 @@ function TypeMaster(){
     clearInterval(timerRef.current);
     wordRefs.current={};
     var w,quote=null;
+    var sm=subModeRef.current;
+    var timed=(mode==='time');
+    var wordCount=timed?300:wordsOpt;
     if(mode==='quotes'){quote=QUOTES[Math.floor(Math.random()*QUOTES.length)];w=quote.text.toLowerCase().split(' ');}
-    else if(mode==='numbers'||numsOnlyRf.current){w=genNumberWords(fingerSubRef.current==='time'?300:wordsOpt);}
+    else if(mode==='fingers'){w=genFingerWords(selFingersRf.current,timed||fingerSubRef.current==='time'?300:wordsOpt);}
+    else if(sm==='numbers'){w=genNumberWords(wordCount);}
+    else if(sm==='letters'){w=genLetterWords(wordCount);}
+    else if(sm==='zen'){w=[];zenTextRf.current='';setZenText('');endlessExtendedRf.current=false;}
+    else if(sm==='endless'){w=genBalancedWords(300,usePunctRf.current,useNumsRf.current);endlessExtendedRf.current=false;}
     else if(mode==='words'){w=genBalancedWords(wordsOpt,usePunctRf.current,useNumsRf.current);}
-    else if(mode==='letters'){w=genLetterWords(fingerSubRef.current==='time'?300:wordsOpt);}
-    else if(mode==='calibrator'){var cp=shuffle(CALIBRATOR_POOL.slice());var cr=[];while(cr.length<(fingerSubRef.current==='time'?300:wordsOpt))cr=cr.concat(cp);w=cr.slice(0,fingerSubRef.current==='time'?300:wordsOpt);}
-    else if(mode==='zen'){w=[];zenTextRf.current='';setZenText('');endlessExtendedRf.current=false;}
-    else if(mode==='endless'){w=genBalancedWords(300,usePunctRf.current,useNumsRf.current);endlessExtendedRf.current=false;}
-    else if(mode==='fingers'){w=genFingerWords(selFingersRf.current,fingerSubRef.current==='time'?300:wordsOpt);}
-    else{w=genBalancedWords(350,usePunctRf.current,useNumsRf.current);}
+    else{w=genBalancedWords(timed?300:350,usePunctRf.current,useNumsRf.current);}
     wordsRf.current=w;completedRf.current=[];wordIdxRf.current=0;
     keyErrRf.current={};bigramErrRf.current={};wpmHistRf.current=[];correctRf.current=0;
     allKsRf.current=0;correctKsRf.current=0;
@@ -395,10 +409,11 @@ function TypeMaster(){
     phaseRef.current='typing';setPhase('typing');startRf.current=Date.now();
     timerRef.current=setInterval(function(){
       var elapsed=(Date.now()-startRf.current)/1000;
-      var wpm=Math.round(correctRf.current/(elapsed/60))||0;
+      var correctCh=completedRf.current.reduce(function(s,c){return c.ok?s+c.word.length+1:s;},0);
+      var wpm=Math.round(correctCh/5/(elapsed/60))||0;
       wpmHistRf.current=wpmHistRf.current.concat([{t:Math.round(elapsed),wpm:wpm}]);
       setWpmHist(wpmHistRf.current.slice());setLiveWpm(wpm);
-      if(modeRef.current==='time'||(modeRef.current==='fingers'&&fingerSubRef.current==='time')||(modeRef.current==='numbers'&&fingerSubRef.current==='time')||(modeRef.current==='letters'&&fingerSubRef.current==='time')||(modeRef.current==='calibrator'&&fingerSubRef.current==='time')){
+      if(modeRef.current==='time'||((modeRef.current==='words')&&(subModeRef.current==='numbers'||subModeRef.current==='letters')&&fingerSubRef.current==='time')||(modeRef.current==='fingers'&&fingerSubRef.current==='time')){
         var rem=Math.max(0,timeOptRef.current-Math.floor(elapsed));
         setTimeLeft(rem);if(rem<=0)doFinish();
       }
@@ -406,9 +421,11 @@ function TypeMaster(){
   },[doFinish]);
 
   var handleKeyDown=useCallback(function(e){
-    if(e.key==='Tab'){e.preventDefault();init();return;}
+    if(e.key==='Tab'){e.preventDefault();
+      if(restartBtnRef.current)restartBtnRef.current.focus();
+      return;}
     if(e.key==='Escape'){e.preventDefault();
-      if((modeRef.current==='zen'||modeRef.current==='endless')&&phaseRef.current==='typing'){doFinish();}
+      if((subModeRef.current==='zen'||subModeRef.current==='endless')&&phaseRef.current==='typing'){doFinish();}
       else{init();}
       return;}
     if(e.key==='Backspace'&&curInputRef.current===''&&wordIdxRf.current>0){
@@ -430,7 +447,7 @@ function TypeMaster(){
     curInputRef.current=val;
     if(phaseRef.current!=='typing'&&val.trim())startTyping();
     /* zen mode: track user's own typed words */
-    if(modeRef.current==='zen'&&val.slice(-1)===' '){
+    if(subModeRef.current==='zen'&&val.slice(-1)===' '){
       var zinput=val.trim();
       if(!zinput){setCurInput('');curInputRef.current='';return;}
       correctRf.current++;
@@ -454,14 +471,15 @@ function TypeMaster(){
       var ni=wordIdxRf.current+1;
       wordIdxRf.current=ni;curInputRef.current='';
       setWordIdx(ni);setCurInput('');
-      if(modeRef.current==='endless'&&ni>wordsRf.current.length-100&&!endlessExtendedRf.current){
+      if(subModeRef.current==='endless'&&ni>wordsRf.current.length-100&&!endlessExtendedRf.current){
         endlessExtendedRf.current=true;
         var more=genBalancedWords(200,usePunctRf.current,useNumsRf.current);
         wordsRf.current=wordsRf.current.concat(more);
         setWords(wordsRf.current.slice());
         setTimeout(function(){endlessExtendedRf.current=false;},500);
       }
-      if((mode==='words'||mode==='quotes'||mode==='fingers'||mode==='numbers'||mode==='letters'||mode==='calibrator'||practicePhaseRef.current==='drilling')&&ni>=wordsRf.current.length)doFinish();
+      var sm2=subModeRef.current;
+      if((mode==='words'||mode==='quotes'||mode==='fingers'||(mode==='time'&&(sm2==='numbers'||sm2==='letters'))||practicePhaseRef.current==='drilling')&&ni>=wordsRf.current.length)doFinish();
       return;
     }
     if(val.length>prev.length){
@@ -484,7 +502,8 @@ function TypeMaster(){
         }
       }
     }
-    var isLast=(mode==='words'||mode==='quotes'||mode==='fingers'||mode==='numbers'||mode==='letters'||mode==='calibrator'||practicePhaseRef.current==='drilling')&&wordIdxRf.current===wordsRf.current.length-1;
+    var sm3=subModeRef.current;
+    var isLast=(mode==='words'||mode==='quotes'||mode==='fingers'||(mode==='time'&&(sm3==='numbers'||sm3==='letters'))||practicePhaseRef.current==='drilling')&&wordIdxRf.current===wordsRf.current.length-1;
     if(isLast){
       var ct=wordsRf.current[wordIdxRf.current]||'';
       if(val===ct){
@@ -781,52 +800,60 @@ function TypeMaster(){
 
     h('div',{style:{maxWidth:1100,margin:'0 auto',padding:(isDrilling?'16px':'36px')+' 36px 0',display:'flex',justifyContent:'space-between',alignItems:'baseline'}},
       h('span',{style:{fontFamily:FS,fontSize:52,fontWeight:800,color:CW,lineHeight:1,letterSpacing:-2}},
-        (mode==='time'||(mode==='fingers'&&fingerSubRef.current==='time')||(mode==='numbers'&&fingerSubRef.current==='time')||(mode==='letters'&&fingerSubRef.current==='time')||(mode==='calibrator'&&fingerSubRef.current==='time'))?String(timeLeft):(mode==='zen'||mode==='endless')?String(wordIdx):wordIdx+' / '+words.length),
+        (mode==='time'||(mode==='fingers'&&fingerSubRef.current==='time'))?String(timeLeft):(subMode==='zen'||subMode==='endless')?String(wordIdx):wordIdx+' / '+words.length),
       h('span',{style:{fontFamily:FS,fontSize:18,fontWeight:700,color:uiColor,letterSpacing:1}},
         phase==='typing'?liveWpm+' WPM':'')
     ),
 
     !isDrilling&&h('div',{style:{maxWidth:1100,margin:'22px auto 0',padding:'0 36px',display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}},
+      /* ── top row: mode tabs ── */
       h('div',{style:{display:'flex',background:'#111',borderRadius:6,padding:3,gap:2}},
-        [{k:'time',l:'TIME'},{k:'words',l:'WORDS'},{k:'quotes',l:'QUOTES'},{k:'numbers',l:'123'},{k:'letters',l:'ABC'},{k:'calibrator',l:'CALIB'},{k:'zen',l:'ZEN'},{k:'endless',l:'\u221E'},{k:'fingers',l:'FINGERS'}].map(function(item){
+        [{k:'time',l:'TIME'},{k:'words',l:'WORDS'},{k:'quotes',l:'QUOTES'},{k:'fingers',l:'FINGERS'}].map(function(item){
           var active=mode===item.k;
           return h('button',{key:item.k,onClick:function(e){e.stopPropagation();setMode(item.k);},
             style:{background:active?'#1e1e1e':'none',color:active?CW:uiColor,border:'none',padding:'7px 20px',borderRadius:4,fontFamily:FS,fontSize:11,fontWeight:800,letterSpacing:2,transition:'all 0.15s'}},item.l);
         })
       ),
       h('div',{style:{width:1,height:18,background:'#1e1e1e',margin:'0 4px'}}),
+      /* ── time/words: quantity selector ── */
       mode==='time'?[15,30,60].map(function(t){
         return h('button',{key:t,onClick:function(e){e.stopPropagation();setTimeOpt(t);},
           style:{background:'none',color:timeOpt===t?CW:uiColor,border:'none',padding:'7px 14px',fontFamily:FS,fontSize:13,fontWeight:timeOpt===t?800:500,transition:'color 0.15s'}},String(t));
       }):null,
-      mode==='words'?[10,25,50,100].map(function(n){
+      mode==='words'&&subMode==='normal'?[10,25,50,100].map(function(n){
         return h('button',{key:n,onClick:function(e){e.stopPropagation();setWordsOpt(n);},
           style:{background:'none',color:wordsOpt===n?CW:uiColor,border:'none',padding:'7px 14px',fontFamily:FS,fontSize:13,fontWeight:wordsOpt===n?800:500,transition:'color 0.15s'}},String(n));
       }):null,
-      (mode==='time'||mode==='words')?h('div',{style:{display:'flex',gap:2,marginLeft:4}},
-        h('button',{onClick:function(e){e.stopPropagation();
-          var nv=!usePunct;setUsePunct(nv);usePunctRf.current=nv;
-          if(phaseRef.current==='idle')setTimeout(init,0);},
-          style:{background:'none',color:usePunct?CW:uiColor,border:'none',padding:'7px 10px',fontFamily:FS,fontSize:11,fontWeight:usePunct?800:400,transition:'color 0.15s',letterSpacing:1}},
-          '@ punct'),
-        h('button',{onClick:function(e){e.stopPropagation();
-          var nv=!useNums;setUseNums(nv);useNumsRf.current=nv;
-          if(phaseRef.current==='idle')setTimeout(init,0);},
-          style:{background:'none',color:useNums?CW:uiColor,border:'none',padding:'7px 10px',fontFamily:FS,fontSize:11,fontWeight:useNums?800:400,transition:'color 0.15s',letterSpacing:1}},
-          '# nums')
+      /* ── time/words: sub-genre pills ── */
+      (mode==='time'||mode==='words')?h('div',{style:{display:'flex',alignItems:'center',gap:2,marginLeft:4}},
+        [{k:'normal',l:'NORMAL'},{k:'numbers',l:'123'},{k:'letters',l:'ABC'},{k:'zen',l:'ZEN'},{k:'endless',l:'\u221E'}].map(function(sm){
+          var smActive=subMode===sm.k;
+          return h('button',{key:sm.k,onClick:function(e){e.stopPropagation();setSubMode(sm.k);subModeRef.current=sm.k;setTimeout(init,0);},
+            style:{background:smActive?'#1e1e1e':'none',color:smActive?CW:uiColor,border:smActive?'1px solid #333':'1px solid transparent',
+              padding:'5px 12px',borderRadius:4,fontFamily:FS,fontSize:10,fontWeight:smActive?800:500,
+              letterSpacing:1,transition:'all 0.15s',cursor:'pointer'}},sm.l);
+        }),
+        h('div',{style:{width:1,height:14,background:'#1e1e1e',margin:'0 6px'}}),
+        /* punct/nums toggles only for normal/endless */
+        (subMode==='normal'||subMode==='endless')?h('div',{style:{display:'flex',gap:2}},
+          h('button',{onClick:function(e){e.stopPropagation();
+            var nv=!usePunct;setUsePunct(nv);usePunctRf.current=nv;
+            if(phaseRef.current==='idle')setTimeout(init,0);},
+            style:{background:'none',color:usePunct?CW:uiColor,border:'none',padding:'5px 8px',fontFamily:FS,fontSize:10,fontWeight:usePunct?800:400,transition:'color 0.15s',letterSpacing:1}},'@ punct'),
+          h('button',{onClick:function(e){e.stopPropagation();
+            var nv=!useNums;setUseNums(nv);useNumsRf.current=nv;
+            if(phaseRef.current==='idle')setTimeout(init,0);},
+            style:{background:'none',color:useNums?CW:uiColor,border:'none',padding:'5px 8px',fontFamily:FS,fontSize:10,fontWeight:useNums?800:400,transition:'color 0.15s',letterSpacing:1}},'# nums')
+        ):null
       ):null,
+      /* words + sub-genre that has word count */
+      mode==='words'&&(subMode==='numbers'||subMode==='letters')?[10,25,50,100].map(function(n){
+        return h('button',{key:n,onClick:function(e){e.stopPropagation();setWordsOpt(n);},
+          style:{background:'none',color:wordsOpt===n?CW:uiColor,border:'none',padding:'7px 14px',fontFamily:FS,fontSize:13,fontWeight:wordsOpt===n?800:500,transition:'color 0.15s'}},String(n));
+      }):null,
+      /* quotes author */
       (mode==='quotes'&&activeQuote)?h('span',{style:{fontFamily:FS,fontSize:12,color:'#333',fontStyle:'italic',fontWeight:700,marginLeft:4}},'— '+activeQuote.author):null,
-      (mode==='numbers'||mode==='letters'||mode==='calibrator'||mode==='endless')?h('div',{style:{display:'flex',alignItems:'center',gap:2}},
-        [15,30,60].map(function(t){return h('button',{key:'xxt'+t,
-          onClick:function(e){e.stopPropagation();setTimeOpt(t);setFingerSub('time');},
-          style:{background:'none',color:(fingerSub==='time'&&timeOpt===t)?CW:uiColor,border:'none',
-            padding:'7px 12px',fontFamily:FS,fontSize:12,fontWeight:(fingerSub==='time'&&timeOpt===t)?800:500,transition:'color 0.15s'}},t+'s');}),
-        h('div',{style:{width:1,height:14,background:'#1e1e1e',margin:'0 4px'}}),
-        [10,25,50].map(function(n){return h('button',{key:'xxw'+n,
-          onClick:function(e){e.stopPropagation();setWordsOpt(n);setFingerSub('words');},
-          style:{background:'none',color:(fingerSub==='words'&&wordsOpt===n)?CW:uiColor,border:'none',
-            padding:'7px 12px',fontFamily:FS,fontSize:12,fontWeight:(fingerSub==='words'&&wordsOpt===n)?800:500,transition:'color 0.15s'}},n+' w');})
-      ):null,
+      /* fingers sub-options */
       mode==='fingers'?h('div',{style:{display:'flex',alignItems:'center',gap:2}},
         [15,30,60].map(function(t){return h('button',{key:'ft'+t,
           onClick:function(e){e.stopPropagation();setTimeOpt(t);setFingerSub('time');},
@@ -838,7 +865,10 @@ function TypeMaster(){
           style:{background:'none',color:(fingerSub==='words'&&wordsOpt===n)?CW:uiColor,border:'none',
             padding:'7px 12px',fontFamily:FS,fontSize:12,fontWeight:(fingerSub==='words'&&wordsOpt===n)?800:500,transition:'color 0.15s'}},n+' w');})
       ):null,
-      h('button',{onClick:function(e){e.stopPropagation();init();},
+      /* restart button — Tab focuses it, Enter triggers restart */
+      h('button',{ref:restartBtnRef,onClick:function(e){e.stopPropagation();init();},
+        onFocus:function(e){e.currentTarget.style.color=CW;e.currentTarget.style.outline='none';},
+        onBlur:function(e){e.currentTarget.style.color=uiColorDim;},
         onMouseEnter:function(e){e.currentTarget.style.color=CW;},
         onMouseLeave:function(e){e.currentTarget.style.color=uiColorDim;},
         style:{marginLeft:'auto',background:'none',border:'none',color:uiColorDim,fontFamily:FS,fontSize:22,padding:'0 4px',transition:'color 0.15s',fontWeight:300}},'\u21BB')
@@ -847,7 +877,7 @@ function TypeMaster(){
     mode==='fingers'&&!isDrilling&&!numsOnly&&renderFingerSelector(),
 
     /* ZEN MODE special display */
-    mode==='zen'&&h('div',{style:{maxWidth:1100,margin:'32px auto 0',padding:'0 36px'}},
+    subMode==='zen'&&h('div',{style:{maxWidth:1100,margin:'32px auto 0',padding:'0 36px'}},
       h('div',{style:{minHeight:165,position:'relative',borderBottom:'1px solid #1a1a1a',paddingBottom:16}},
         h('div',{style:{fontFamily:FM,fontSize:WORD_SIZE,lineHeight:LINE_H,color:CW,wordBreak:'break-word',userSelect:'none',whiteSpace:'pre-wrap'}},
           zenText,
@@ -861,7 +891,7 @@ function TypeMaster(){
       h('div',{style:{fontFamily:FS,fontSize:9,fontWeight:700,letterSpacing:3,color:uiColorDim,textTransform:'uppercase',marginTop:12}},'TYPE FREELY  \u00B7  ESC TO STOP AND SEE RESULTS')
     ),
 
-    mode!=='zen'&&h('div',{style:{maxWidth:1100,margin:'30px auto 0',padding:'0 36px',position:'relative'}},
+    subMode!=='zen'&&h('div',{style:{maxWidth:1100,margin:'30px auto 0',padding:'0 36px',position:'relative'}},
       h('div',{style:{position:'absolute',top:0,left:36,right:36,height:28,background:'linear-gradient(to bottom,#0a0a0a 20%,transparent)',zIndex:10,pointerEvents:'none'}}),
       h('div',{ref:containerRef,style:{height:VISIBLE_H+'px',overflow:'hidden',position:'relative'}},
         h('div',{style:{lineHeight:LINE_H,transform:'translateY(-'+scrollOffset+'px)',transition:'transform 0.16s cubic-bezier(0.4,0,0.2,1)',userSelect:'none',paddingTop:'4px'}},
@@ -876,7 +906,7 @@ function TypeMaster(){
 
     h('div',{style:{textAlign:'center',marginTop:24,fontFamily:FS,fontSize:10,fontWeight:700,letterSpacing:3,textTransform:'uppercase',transition:'color 0.4s',userSelect:'none',color:phase==='idle'?uiColorDim:'transparent'}},
       isDrilling?'DRILL MODE \u00B7 TAB / ESC TO EXIT':
-      (mode==='zen'||mode==='endless')?'':
+      (subMode==='zen'||subMode==='endless')?'':
       'START TYPING \u00B7 TAB / ESC TO RESTART \u00B7 BACKSPACE TO FIX PREVIOUS WORD')
   );
 }
